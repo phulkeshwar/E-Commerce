@@ -62,10 +62,21 @@ button {
 
 .main-shell {
   flex: 1;
+  overflow-x: hidden;
 }
 
 .page-transition {
-  animation: fadeUp 0.35s cubic-bezier(.22, 1, .36, 1) both;
+  min-height: calc(100vh - 130px);
+  will-change: opacity, transform;
+}
+
+.page-enter {
+  animation: pageIn 0.28s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.page-exit {
+  animation: pageOut 0.18s cubic-bezier(.55, 0, 1, .45) both;
+  pointer-events: none;
 }
 
 .page-content {
@@ -405,6 +416,104 @@ button {
 .sec-label {
   color: var(--lt);
   margin-bottom: 0.2rem;
+}
+
+.brand-ad-section {
+  padding: 1.5rem 2rem 0;
+}
+
+.brand-ad-window {
+  overflow: hidden;
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 10px 32px var(--sh);
+}
+
+.brand-ad-track {
+  display: flex;
+  transition: transform 0.55s cubic-bezier(.22, 1, .36, 1);
+  will-change: transform;
+}
+
+.brand-ad-card {
+  min-width: 100%;
+  min-height: 210px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) 280px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.22), transparent 28%),
+    linear-gradient(135deg, var(--ad-accent), #2c1a0e);
+  color: white;
+}
+
+.brand-ad-copy {
+  display: grid;
+  align-content: center;
+  gap: 0.45rem;
+  padding: 1.8rem;
+}
+
+.brand-ad-copy span {
+  width: fit-content;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.brand-ad-copy h3 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.45rem, 3vw, 2.2rem);
+  line-height: 1.1;
+}
+
+.brand-ad-copy p {
+  max-width: 440px;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.brand-ad-copy strong {
+  width: fit-content;
+  border-radius: 6px;
+  background: var(--gold);
+  color: var(--dk);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.brand-ad-card img {
+  width: 100%;
+  height: 100%;
+  min-height: 210px;
+  object-fit: cover;
+}
+
+.brand-ad-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-top: 0.85rem;
+}
+
+.brand-ad-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--bd);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.brand-ad-dot.active {
+  background: var(--tc);
+  transform: scale(1.25);
 }
 
 .hscroll {
@@ -1862,6 +1971,30 @@ td {
   }
 }
 
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pageOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.99);
+  }
+}
+
 @media (max-width: 1024px) {
   .hero,
   .shop-layout,
@@ -1901,5 +2034,15 @@ td {
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .brand-ad-card {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-ad-card img {
+    order: -1;
+    height: 170px;
+    min-height: 170px;
   }
 }

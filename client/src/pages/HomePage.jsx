@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ProductGrid } from "../components/product/ProductGrid";
 import { Spinner } from "../components/ui/Spinner";
@@ -5,9 +6,49 @@ import { categories } from "../constants/categories";
 import { useProducts } from "../hooks/useProducts";
 import { useTimer } from "../hooks/useTimer";
 
+const brandAds = [
+  {
+    brand: "Pahadi Roots",
+    title: "Mountain pantry festival",
+    copy: "Stone-ground flours, wild honey, and Himalayan salts for slow weekend cooking.",
+    offer: "Up to 25% off",
+    accent: "#2f5f4b",
+    image:
+      "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    brand: "Brew Yard",
+    title: "Cafe-style mornings",
+    copy: "Single-origin coffee, cocoa mixes, and breakfast blends delivered fresh.",
+    offer: "Buy 2, save 15%",
+    accent: "#6f3f22",
+    image:
+      "https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    brand: "Leaf & Loom",
+    title: "Clean home essentials",
+    copy: "Plant-powered cleaners, soft linens, and fragrance-light care for everyday spaces.",
+    offer: "Flat 20% off",
+    accent: "#365e7d",
+    image:
+      "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?auto=format&fit=crop&w=900&q=80",
+  },
+  {
+    brand: "Ayur Glow",
+    title: "Ritual-ready self care",
+    copy: "Herbal oils, body butters, and calming teas made for evening reset routines.",
+    offer: "Combo deals live",
+    accent: "#914d42",
+    image:
+      "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=900&q=80",
+  },
+];
+
 export function HomePage() {
   const { products, featured, loading } = useProducts({});
   const timer = useTimer();
+  const [activeAd, setActiveAd] = useState(0);
   const deal = [...products]
     .filter((product) => product.originalPrice)
     .sort(
@@ -25,6 +66,14 @@ export function HomePage() {
     "Personal Care": "💆",
     Health: "💊",
   };
+
+  useEffect(() => {
+    const timerId = window.setInterval(() => {
+      setActiveAd((current) => (current + 1) % brandAds.length);
+    }, 2000);
+
+    return () => window.clearInterval(timerId);
+  }, []);
 
   return (
     <section className="page-content">
@@ -61,6 +110,49 @@ export function HomePage() {
           </div>
         ))}
       </div>
+
+      <section className="brand-ad-section fade-up stagger-1">
+        <div className="sec-head">
+          <div>
+            <div className="sec-label">Brand Spotlight</div>
+            <h2>Fresh Ads Every Moment</h2>
+          </div>
+          <Link to="/shop">Explore brands â†’</Link>
+        </div>
+        <div className="brand-ad-window" aria-label="Featured brand advertisements">
+          <div
+            className="brand-ad-track"
+            style={{ transform: `translateX(-${activeAd * 100}%)` }}
+          >
+            {brandAds.map((ad) => (
+              <article
+                className="brand-ad-card"
+                key={ad.brand}
+                style={{ "--ad-accent": ad.accent }}
+              >
+                <div className="brand-ad-copy">
+                  <span>{ad.brand}</span>
+                  <h3>{ad.title}</h3>
+                  <p>{ad.copy}</p>
+                  <strong>{ad.offer}</strong>
+                </div>
+                <img src={ad.image} alt={`${ad.brand} promotion`} />
+              </article>
+            ))}
+          </div>
+        </div>
+        <div className="brand-ad-dots" aria-label="Choose brand advertisement">
+          {brandAds.map((ad, index) => (
+            <button
+              aria-label={`Show ${ad.brand}`}
+              className={`brand-ad-dot${index === activeAd ? " active" : ""}`}
+              key={ad.brand}
+              onClick={() => setActiveAd(index)}
+              type="button"
+            />
+          ))}
+        </div>
+      </section>
 
       <section className="section fade-up stagger-1">
         <div className="sec-head">
