@@ -2,6 +2,9 @@ import { getStoredSession } from "../store/authStore";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const DIRECT_API_BASE_URL = BACKEND_URL.replace(/\/$/, "").endsWith("/api")
+  ? BACKEND_URL.replace(/\/$/, "")
+  : `${BACKEND_URL.replace(/\/$/, "")}/api`;
 
 const parseResponseBody = async (response) => {
   const contentType = response.headers.get("Content-Type") || "";
@@ -55,8 +58,9 @@ export async function apiRequest(path, options = {}) {
           : undefined,
   };
 
-  const relativeUrl = `${API_BASE_URL}${path}`;
-  const directUrl = `${BACKEND_URL}${path}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const relativeUrl = `${API_BASE_URL}${normalizedPath}`;
+  const directUrl = `${DIRECT_API_BASE_URL}${normalizedPath}`;
 
   try {
     return await makeFetch(relativeUrl, fetchOptions);

@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppContext } from "../hooks/useAppContext";
 
 export function AccountPage() {
   const { user, logout, orders } = useAppContext();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   if (!user) {
     return (
@@ -24,8 +27,17 @@ export function AccountPage() {
       <div className="account-page">
         <h2 className="account-title">👤 My Account</h2>
         <div className="account-grid">
-          <div>
-            <div className="profile-card">
+          <div className={`mobile-collapsible ${profileOpen ? "is-open" : ""}`}>
+            <button
+              aria-expanded={profileOpen}
+              className="mobile-toggle"
+              onClick={() => setProfileOpen((current) => !current)}
+              type="button"
+            >
+              <span>Account Details</span>
+              <span>{profileOpen ? "Hide" : "Show"}</span>
+            </button>
+            <div className="profile-card mobile-collapsible-content">
               <div className="profile-avatar">
                 {user.name
                   .split(" ")
@@ -48,8 +60,17 @@ export function AccountPage() {
               </div>
             </div>
           </div>
-          <div>
-            <div className="account-links">
+          <div className={`mobile-collapsible ${settingsOpen ? "is-open" : ""}`}>
+            <button
+              aria-expanded={settingsOpen}
+              className="mobile-toggle"
+              onClick={() => setSettingsOpen((current) => !current)}
+              type="button"
+            >
+              <span>User Settings</span>
+              <span>{settingsOpen ? "Hide" : "Show"}</span>
+            </button>
+            <div className="account-links mobile-collapsible-content">
               <Link className="acct-link" to="/orders">
                 <span className="al-icon">📦</span>My Orders<span className="al-arrow">›</span>
               </Link>

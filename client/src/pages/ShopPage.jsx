@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ProductGrid } from "../components/product/ProductGrid";
 import { Spinner } from "../components/ui/Spinner";
@@ -8,13 +8,15 @@ import { useProducts } from "../hooks/useProducts";
 
 export function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const search = searchParams.get("search") || "";
   const category = searchParams.get("category") || "All";
+  const badge = searchParams.get("badge") || "";
   const sort = searchParams.get("sort") || "relevance";
   const debouncedSearch = useDebounce(search);
   const filters = useMemo(
-    () => ({ search: debouncedSearch, category }),
-    [category, debouncedSearch],
+    () => ({ search: debouncedSearch, category, badge }),
+    [badge, category, debouncedSearch],
   );
   const { products, loading, error } = useProducts(filters);
   const sortedProducts = useMemo(() => {
@@ -38,7 +40,17 @@ export function ShopPage() {
   return (
     <section className="page-content">
       <div className="shop-layout">
-        <aside className="filter-sidebar">
+        <aside className={`filter-sidebar mobile-collapsible ${filtersOpen ? "is-open" : ""}`}>
+          <button
+            aria-expanded={filtersOpen}
+            className="mobile-toggle"
+            onClick={() => setFiltersOpen((current) => !current)}
+            type="button"
+          >
+            <span>Filters</span>
+            <span>{filtersOpen ? "Hide" : "Show"}</span>
+          </button>
+          <div className="mobile-collapsible-content">
           <h3>🔧 Filters</h3>
           <div className="filter-group">
             <label>Category</label>
@@ -81,12 +93,14 @@ export function ShopPage() {
           <button className="filter-clear" onClick={() => setSearchParams(new URLSearchParams())}>
             Clear All
           </button>
+          </div>
         </aside>
         <div className="shop-main">
           <div className="shop-toolbar">
             <span>
               {sortedProducts.length} result{sortedProducts.length !== 1 ? "s" : ""}
               {search ? ` for "${search}"` : ""}
+              {badge === "new" ? " in New Arrivals" : ""}
             </span>
             <select
               className="sort-sel"

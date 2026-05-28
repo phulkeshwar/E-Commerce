@@ -56,8 +56,16 @@ export function HomePage() {
         (right.originalPrice - right.price) / right.originalPrice -
         (left.originalPrice - left.price) / left.originalPrice,
     )[0];
-  const topProducts = [...products].sort((left, right) => right.rating - left.rating).slice(0, 8);
-  const newArrivals = products.filter((product) => product.badge === "new").slice(0, 8);
+  const homeProducts = products.length ? products : featured;
+  const topProducts = [...homeProducts]
+    .sort((left, right) => Number(right.rating || 0) - Number(left.rating || 0))
+    .slice(0, 8);
+  const newArrivals = homeProducts
+    .filter((product) => String(product.badge || "").toLowerCase() === "new")
+    .slice(0, 8);
+  const newestProducts = [...homeProducts]
+    .sort((left, right) => new Date(right.createdAt || 0) - new Date(left.createdAt || 0))
+    .slice(0, 8);
   const categoryEmoji = {
     All: "🛒",
     Pantry: "🫙",
@@ -216,9 +224,9 @@ export function HomePage() {
             <div className="sec-label">Highest Rated</div>
             <h2>Top Picks</h2>
           </div>
-          <Link to="/shop">See all →</Link>
+          <Link to="/shop?sort=rating">See all →</Link>
         </div>
-        {loading ? <Spinner /> : <ProductGrid products={topProducts.length ? topProducts : featured} />}
+        {loading ? <Spinner /> : <ProductGrid products={topProducts} />}
       </div>
 
       <div className="promo-strip fade-up stagger-4">
@@ -244,9 +252,9 @@ export function HomePage() {
             <div className="sec-label">Just In</div>
             <h2>New Arrivals</h2>
           </div>
-          <Link to="/shop">See all →</Link>
+          <Link to="/shop?badge=new&sort=newest">See all →</Link>
         </div>
-        {loading ? <Spinner /> : <ProductGrid products={newArrivals.length ? newArrivals : featured} />}
+        {loading ? <Spinner /> : <ProductGrid products={newArrivals.length ? newArrivals : newestProducts} />}
       </div>
     </section>
   );
