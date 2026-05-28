@@ -35,7 +35,27 @@ export function Navbar() {
         <button className="nav-logo" onClick={() => navigate("/")}>
           🛒 Gram<span>Bazaar</span>
         </button>
-         <div className="nav-icons">
+
+        <form className="nav-search" onSubmit={handleSearch}>
+          <select name="category" defaultValue={categoryValue} aria-label="Product category">
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <input
+            name="search"
+            placeholder="Search products, brands..."
+            defaultValue={searchValue}
+            aria-label="Search products"
+          />
+          <button className="nav-search-btn" type="submit" aria-label="Search">
+            🔍
+          </button>
+        </form>
+
+        <div className="nav-icons">
           {user ? (
             <>
               <button className="nav-icon-btn" onClick={() => navigate("/account")}>
@@ -56,7 +76,7 @@ export function Navbar() {
 
           <button className="nav-icon-btn" onClick={() => navigate("/wishlist")}>
             <span className="nav-icon-wrap">
-              <span className="icon">❤️</span>
+              <span className="icon">💗</span>
               {wishlistIds.length > 0 ? <span className="nav-badge">{wishlistIds.length}</span> : null}
             </span>
             <span className="lbl">Wishlist</span>
@@ -73,24 +93,7 @@ export function Navbar() {
           </button>
         </div>
       </div>
-        <form className="nav-search" onSubmit={handleSearch}>
-          <select name="category" defaultValue={categoryValue}>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-          <input
-            name="search"
-            placeholder="Search products, brands..."
-            defaultValue={searchValue}
-          />
-          <button className="nav-search-btn" type="submit">
-            🔍
-          </button>
-        </form>
-       
+
       <div className="nav-bottom">
         <NavLink to="/">Home</NavLink>
         <NavLink to="/shop">Shop All</NavLink>
