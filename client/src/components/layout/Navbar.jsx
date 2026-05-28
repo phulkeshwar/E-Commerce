@@ -35,24 +35,7 @@ export function Navbar() {
         <button className="nav-logo" onClick={() => navigate("/")}>
           🛒 Gram<span>Bazaar</span>
         </button>
-        <form className="nav-search" onSubmit={handleSearch}>
-          <select name="category" defaultValue={categoryValue}>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-          <input
-            name="search"
-            placeholder="Search products, brands..."
-            defaultValue={searchValue}
-          />
-          <button className="nav-search-btn" type="submit">
-            🔍
-          </button>
-        </form>
-        <div className="nav-icons">
+         <div className="nav-icons">
           {user ? (
             <>
               <button className="nav-icon-btn" onClick={() => navigate("/account")}>
@@ -90,6 +73,24 @@ export function Navbar() {
           </button>
         </div>
       </div>
+        <form className="nav-search" onSubmit={handleSearch}>
+          <select name="category" defaultValue={categoryValue}>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <input
+            name="search"
+            placeholder="Search products, brands..."
+            defaultValue={searchValue}
+          />
+          <button className="nav-search-btn" type="submit">
+            🔍
+          </button>
+        </form>
+       
       <div className="nav-bottom">
         <NavLink to="/">Home</NavLink>
         <NavLink to="/shop">Shop All</NavLink>

@@ -1,7 +1,7 @@
 import { getStoredSession } from "../store/authStore";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
 const DIRECT_API_BASE_URL = BACKEND_URL.replace(/\/$/, "").endsWith("/api")
   ? BACKEND_URL.replace(/\/$/, "")
   : `${BACKEND_URL.replace(/\/$/, "")}/api`;
