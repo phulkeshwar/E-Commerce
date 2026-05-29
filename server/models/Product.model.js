@@ -31,9 +31,8 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-
-productSchema.index({ slug: 1 }, { unique: true });
 productSchema.index({ name: "text", description: "text", tags: "text" });
+
 
 productSchema.methods.toClient = function toClient() {
   const raw = this.toObject({ flattenMaps: true });
