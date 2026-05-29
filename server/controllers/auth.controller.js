@@ -16,11 +16,15 @@ export const register = async (req, res) => {
     Number(process.env.BCRYPT_SALT_ROUNDS || 12),
   );
 
+  const allowedSelfRoles = ["user", "seller"];
+  const requestedRole = req.body.role || "user";
+  const role = allowedSelfRoles.includes(requestedRole) ? requestedRole : "user";
+
   const user = await User.create({
     name: req.body.name.trim(),
     email,
     passwordHash,
-    role: "user",
+    role,
     membership: "Silver",
   });
 
