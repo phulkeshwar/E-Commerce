@@ -95,7 +95,7 @@ export function HomePage() {
           </h1>
           <p>
             From Himalayan kitchens to your doorstep. Artisan products, pure ingredients, honest
-            prices, and the full app now follows the same design language as `Replica.jsx`.
+            prices, and a calmer shopping experience built for everyday essentials.
           </p>
           <Link className="hero-cta" to="/shop">
             Shop Now →
@@ -125,7 +125,7 @@ export function HomePage() {
             <div className="sec-label">Brand Spotlight</div>
             <h2>Fresh Ads Every Moment</h2>
           </div>
-          <Link to="/shop">Explore brands â†’</Link>
+          <Link to="/shop">Explore brands →</Link>
         </div>
         <div className="brand-ad-window" aria-label="Featured brand advertisements">
           <div

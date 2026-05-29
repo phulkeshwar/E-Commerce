@@ -1,6 +1,12 @@
 import { formatCurrency } from "../../utils/formatCurrency";
 
 export function CartItem({ item, onQuantityChange, onRemove }) {
+  const handleDecrement = () => {
+    if (item.quantity > 1) {
+      onQuantityChange(item.id, item.quantity - 1);
+    }
+  };
+
   return (
     <article className="citem">
       <div className="citem-img" style={{ background: item.bg || "#f5f0e8" }}>
@@ -16,7 +22,7 @@ export function CartItem({ item, onQuantityChange, onRemove }) {
         <div className="citem-stock">{item.inStock ? "✅ In Stock" : "❌ Out of Stock"}</div>
         <div className="citem-actions">
           <div className="cqty">
-            <button onClick={() => onQuantityChange(item.id, item.quantity - 1)}>−</button>
+            <button onClick={handleDecrement} disabled={item.quantity <= 1}>−</button>
             <span>{item.quantity}</span>
             <button onClick={() => onQuantityChange(item.id, item.quantity + 1)}>+</button>
           </div>

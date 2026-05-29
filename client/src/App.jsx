@@ -1,4 +1,4 @@
-import { createContext, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   BrowserRouter,
   Route,
@@ -8,6 +8,7 @@ import { Footer } from "./components/layout/Footer";
 import { Navbar } from "./components/layout/Navbar";
 import { PageTransition } from "./components/layout/PageTransition";
 import { Toast } from "./components/ui/Toast";
+import { AppContext } from "./context/AppContext";
 import { useAuth } from "./hooks/useAuth";
 import { useCart } from "./hooks/useCart";
 import { useOrders } from "./hooks/useOrders";
@@ -24,8 +25,6 @@ import { OrderSuccessPage } from "./pages/OrderSuccessPage";
 import { ProductDetailPage } from "./pages/ProductDetailPage";
 import { ShopPage } from "./pages/ShopPage";
 import { WishlistPage } from "./pages/WishlistPage";
-
-export const AppContext = createContext(null);
 
 export default function App() {
   const auth = useAuth();

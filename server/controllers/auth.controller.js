@@ -1,64 +1,52 @@
+import bcrypt from "bcryptjs";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { db } from "../utils/mockDb.js";
 import { generateToken } from "../utils/generateToken.js";
-import { UserModel } from "../models/User.model.js";
+import { User } from "../models/User.model.js";
 
-const sanitizeUser = (user) => ({
-  id: user.id,
-  name: user.name,
-  email: user.email,
-  role: user.role,
-  membership: user.membership,
-});
-
-export const register = (req, res) => {
-  const existingUser = UserModel.findByEmail(db.users, req.body.email);
+export const register = async (req, res) => {
+  const email = req.body.email.trim().toLowerCase();
+  const existingUser = await User.findOne({ email });
 
   if (existingUser) {
     return res.status(409).json(new ApiResponse(false, "User already exists."));
   }
 
-  const user = {
-    id: `user-${Date.now()}`,
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
+  const passwordHash = await bcrypt.hash(
+    req.body.password,
+    Number(process.env.BCRYPT_SALT_ROUNDS || 12),
+  );
+
+  const user = await User.create({
+    name: req.body.name.trim(),
+    email,
+    passwordHash,
     role: "user",
     membership: "Silver",
-    createdAt: new Date().toISOString(),
-  };
-
-  db.users.push(user);
+  });
 
   return res.status(201).json(
     new ApiResponse(true, "Account created.", {
-      user: sanitizeUser(user),
+      user: user.toClient(),
       token: generateToken(user),
     }),
   );
 };
 
-export const login = (req, res) => {
-  const user = UserModel.findByEmail(db.users, req.body.email);
+export const login = async (req, res) => {
+  const user = await User.findOne({ email: req.body.email.trim().toLowerCase() });
 
-  if (!user || user.password !== req.body.password) {
+  if (!user || !(await bcrypt.compare(req.body.password, user.passwordHash))) {
     return res.status(401).json(new ApiResponse(false, "Invalid email or password."));
   }
 
   return res.json(
     new ApiResponse(true, "Login successful.", {
-      user: sanitizeUser(user),
+      user: user.toClient(),
       token: generateToken(user),
     }),
   );
 };
 
 export const me = (req, res) => {
-  const user = db.users.find((entry) => entry.id === req.user.id);
-
-  if (!user) {
-    return res.status(404).json(new ApiResponse(false, "User not found."));
-  }
-
-  return res.json(new ApiResponse(true, "Profile loaded.", { user: sanitizeUser(user) }));
+  return res.json(new ApiResponse(true, "Profile loaded.", { user: req.user.toClient() }));
 };

@@ -1,4 +1,10 @@
 export const errorHandler = (error, _req, res, _next) => {
   console.error(error);
-  res.status(500).json({ success: false, message: error.message || "Server error." });
+  const status = error.status || error.statusCode || 500;
+  const message =
+    status === 500 && process.env.NODE_ENV === "production"
+      ? "Server error."
+      : error.message || "Server error.";
+
+  res.status(status).json({ success: false, message });
 };

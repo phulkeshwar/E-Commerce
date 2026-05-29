@@ -1,3 +1,25 @@
-import { db } from "../utils/mockDb.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { connectDB } from "../config/db.js";
+import { Product } from "../models/Product.model.js";
+import { slugify } from "../utils/slugify.js";
 
-console.log(`Loaded ${db.products.length} mock products.`);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const products = JSON.parse(fs.readFileSync(path.join(__dirname, "products.json"), "utf8"));
+
+await connectDB();
+
+const docs = products.map((product) => ({
+  ...product,
+  legacyId: product.id,
+  slug: product.slug || slugify(product.name),
+  emoji: product.emoji || "📦",
+}));
+
+await Product.deleteMany({});
+await Product.insertMany(docs);
+
+console.log(`Seeded ${docs.length} products.`);
+process.exit(0);

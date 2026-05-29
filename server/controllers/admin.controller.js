@@ -1,27 +1,47 @@
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { db, saveProducts } from "../utils/mockDb.js";
+import { Coupon } from "../models/Coupon.model.js";
+import { ORDER_STATUSES, Order } from "../models/Order.model.js";
+import { Product } from "../models/Product.model.js";
+import { Review } from "../models/Review.model.js";
+import { User } from "../models/User.model.js";
+import { slugify } from "../utils/slugify.js";
 
-export const getDashboard = (_req, res) => {
-  const revenue = db.orders.reduce((sum, order) => sum + order.total, 0);
+export const getDashboard = async (_req, res) => {
+  const [revenueResult, orders, productCount, userCount, products, recentOrders, topProducts, reviews] =
+    await Promise.all([
+      Order.aggregate([{ $group: { _id: null, revenue: { $sum: "$total" } } }]),
+      Order.countDocuments(),
+      Product.countDocuments(),
+      User.countDocuments(),
+      Product.find().sort({ createdAt: -1 }).limit(100),
+      Order.find().sort({ createdAt: -1 }).limit(10),
+      Product.find().sort({ rating: -1 }).limit(5),
+      Review.find().sort({ createdAt: -1 }).limit(5),
+      Coupon.countDocuments(),
+    ]);
 
   res.json(
     new ApiResponse(true, "Dashboard fetched.", {
       stats: {
-        revenue,
-        orders: db.orders.length,
-        products: db.products.length,
-        users: db.users.length,
+        revenue: revenueResult[0]?.revenue || 0,
+        orders,
+        products: productCount,
+        users: userCount,
       },
-      products: db.products,
-      recentOrders: db.orders.slice(0, 5),
-      topProducts: [...db.products].sort((a, b) => b.rating - a.rating).slice(0, 5),
-      reviews: db.reviews.slice(0, 5),
+      products: products.map((product) => product.toClient()),
+      recentOrders: recentOrders.map((order) => order.toClient()),
+      topProducts: topProducts.map((product) => product.toClient()),
+      reviews: reviews.map((review) => review.toClient()),
     }),
   );
 };
 
-export const updateOrderStatus = (req, res) => {
-  const order = db.orders.find((entry) => entry.id === req.params.id);
+export const updateOrderStatus = async (req, res) => {
+  if (!ORDER_STATUSES.includes(req.body.status)) {
+    return res.status(400).json(new ApiResponse(false, "Invalid order status."));
+  }
+
+  const order = await Order.findOne({ orderNumber: req.params.id });
 
   if (!order) {
     return res.status(404).json(new ApiResponse(false, "Order not found."));
@@ -30,17 +50,17 @@ export const updateOrderStatus = (req, res) => {
   order.status = req.body.status;
   order.statusHistory.push({
     status: req.body.status,
-    updatedAt: new Date().toISOString(),
+    updatedAt: new Date(),
     note: "Updated from admin",
   });
+  await order.save();
 
-  res.json(new ApiResponse(true, "Order updated.", { order }));
+  res.json(new ApiResponse(true, "Order updated.", { order: order.toClient() }));
 };
 
-export const createProduct = (req, res) => {
-  const product = {
-    id: `prod-${Date.now()}`,
-    slug: req.body.name.toLowerCase().replaceAll(" ", "-"),
+export const createProduct = async (req, res) => {
+  const product = await Product.create({
+    slug: req.body.slug || slugify(req.body.name),
     name: req.body.name,
     category: req.body.category,
     price: Number(req.body.price),
@@ -51,22 +71,18 @@ export const createProduct = (req, res) => {
     emoji: req.body.emoji || "📦",
     badge: req.body.badge || null,
     inStock: req.body.inStock ?? true,
-    stockCount: Number(req.body.stockCount || 12),
-    rating: 4.2,
+    stockCount: Number(req.body.stockCount || 0),
+    rating: 0,
     reviewCount: 0,
     tags: req.body.tags || [],
     isFeatured: Boolean(req.body.isFeatured),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+  });
 
-  db.products.unshift(product);
-  saveProducts();
-  res.status(201).json(new ApiResponse(true, "Product created.", { product }));
+  res.status(201).json(new ApiResponse(true, "Product created.", { product: product.toClient() }));
 };
 
-export const updateProduct = (req, res) => {
-  const product = db.products.find((entry) => entry.id === req.params.id);
+export const updateProduct = async (req, res) => {
+  const product = await Product.findById(req.params.id);
 
   if (!product) {
     return res.status(404).json(new ApiResponse(false, "Product not found."));
@@ -74,14 +90,15 @@ export const updateProduct = (req, res) => {
 
   Object.assign(product, {
     ...req.body,
+    slug: req.body.slug || product.slug,
     price: Number(req.body.price ?? product.price),
     originalPrice:
       req.body.originalPrice === null || req.body.originalPrice === ""
         ? null
         : Number(req.body.originalPrice ?? product.originalPrice),
-    updatedAt: new Date().toISOString(),
+    stockCount: Number(req.body.stockCount ?? product.stockCount),
   });
 
-  saveProducts();
-  res.json(new ApiResponse(true, "Product updated.", { product }));
+  await product.save();
+  res.json(new ApiResponse(true, "Product updated.", { product: product.toClient() }));
 };

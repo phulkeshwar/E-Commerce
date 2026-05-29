@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { categories } from "../../constants/categories";
 import { useAppContext } from "../../hooks/useAppContext";
@@ -6,6 +7,8 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { cart, wishlistIds, user } = useAppContext();
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const params = new URLSearchParams(location.search);
   const searchValue = params.get("search") || "";
@@ -27,6 +30,7 @@ export function Navbar() {
     }
 
     navigate(`/shop?${nextParams.toString()}`);
+    setShowMobileSearch(false);
   };
 
   return (
@@ -56,11 +60,19 @@ export function Navbar() {
         </form>
 
         <div className="nav-icons">
+          <button
+            className="mobile-search-toggle"
+            onClick={() => setShowMobileSearch(!showMobileSearch)}
+            aria-label="Toggle search"
+          >
+            🔍
+          </button>
+
           {user ? (
             <>
               <button className="nav-icon-btn" onClick={() => navigate("/account")}>
                 <span className="icon">👤</span>
-                <span className="lbl">{user.name.split(" ")[0]}</span>
+                <span className="lbl">Account</span>
               </button>
               <button className="nav-icon-btn" onClick={() => navigate("/admin")}>
                 <span className="icon">⚙️</span>
@@ -91,16 +103,45 @@ export function Navbar() {
             </span>
             <span className="lbl">Cart</span>
           </button>
+
+          <button
+            className="mobile-toggle"
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            aria-label="Toggle menu"
+          >
+            ☰
+          </button>
         </div>
       </div>
 
-      <div className="nav-bottom">
-        <NavLink to="/">Home</NavLink>
-        <NavLink to="/shop">Shop All</NavLink>
-        <NavLink to="/orders">My Orders</NavLink>
-        <NavLink to="/wishlist">Wishlist</NavLink>
-        <NavLink to={user ? "/account" : "/auth"}>Account</NavLink>
-      </div>
+      {showMobileSearch && (
+        <form className="nav-search" onSubmit={handleSearch} style={{ display: "flex" }}>
+          <select name="category" defaultValue={categoryValue} aria-label="Product category">
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <input
+            name="search"
+            placeholder="Search products..."
+            defaultValue={searchValue}
+            aria-label="Search products"
+          />
+          <button className="nav-search-btn" type="submit" aria-label="Search">
+            🔍
+          </button>
+        </form>
+      )}
+
+      <nav className={`nav-bottom ${showMobileMenu ? "mobile-visible" : ""}`}>
+        <NavLink to="/" onClick={() => setShowMobileMenu(false)}>Home</NavLink>
+        <NavLink to="/shop" onClick={() => setShowMobileMenu(false)}>Shop All</NavLink>
+        <NavLink to="/orders" onClick={() => setShowMobileMenu(false)}>My Orders</NavLink>
+        <NavLink to="/wishlist" onClick={() => setShowMobileMenu(false)}>Wishlist</NavLink>
+        <NavLink to={user ? "/account" : "/auth"} onClick={() => setShowMobileMenu(false)}>Account</NavLink>
+      </nav>
     </header>
   );
 }

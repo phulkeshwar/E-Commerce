@@ -2,8 +2,30 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
+import { createPaymentOrderRequest, verifyPaymentRequest } from "../api/payment.api";
 import { useAppContext } from "../hooks/useAppContext";
 import { formatCurrency } from "../utils/formatCurrency";
+
+const paymentOptions = [
+  { id: "upi", icon: "📲", name: "UPI", desc: "PhonePe, GPay, Paytm" },
+  { id: "card", icon: "💳", name: "Credit / Debit Card", desc: "Visa, Mastercard, RuPay" },
+  { id: "netbanking", icon: "🏦", name: "Net Banking", desc: "All major Indian banks" },
+  { id: "cod", icon: "💵", name: "Cash on Delivery", desc: "Pay when you receive" },
+];
+
+const loadRazorpayScript = () =>
+  new Promise((resolve, reject) => {
+    if (window.Razorpay) {
+      resolve();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = resolve;
+    script.onerror = () => reject(new Error("Unable to load Razorpay checkout."));
+    document.body.appendChild(script);
+  });
 
 export function CheckoutPage() {
   const navigate = useNavigate();
@@ -11,6 +33,8 @@ export function CheckoutPage() {
   const { cart, orders, isAuthenticated, notify } = useAppContext();
   const promo = location.state || { code: "", discount: 0 };
   const [step, setStep] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [placingOrder, setPlacingOrder] = useState(false);
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -31,22 +55,57 @@ export function CheckoutPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const order = await orders.placeOrder({
-      items: cart.items.map((item) => ({
-        productId: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        emoji: item.emoji,
-      })),
-      shippingAddress: form,
-      paymentMethod: "cod",
-      couponCode: promo.code,
-      discount: promo.discount,
-    });
-    cart.clearCart();
-    notify(`Order ${order.id} placed.`);
-    navigate(`/order-success/${order.id}`);
+    setPlacingOrder(true);
+
+    try {
+      const order = await orders.placeOrder({
+        items: cart.items.map((item) => ({
+          productId: item.id,
+          quantity: item.quantity,
+        })),
+        shippingAddress: form,
+        paymentMethod,
+        couponCode: promo.code,
+      });
+
+      if (paymentMethod === "cod") {
+        cart.clearCart();
+        notify(`Order ${order.id} placed.`);
+        navigate(`/order-success/${order.id}`);
+        return;
+      }
+
+      await loadRazorpayScript();
+      const paymentOrder = await createPaymentOrderRequest(order.id);
+      const checkout = new window.Razorpay({
+        key: paymentOrder.keyId,
+        amount: paymentOrder.amount,
+        currency: paymentOrder.currency || "INR",
+        name: "GramBazaar",
+        description: `Order ${order.id}`,
+        order_id: paymentOrder.razorpayOrderId,
+        prefill: {
+          name: form.name,
+          contact: form.phone,
+        },
+        handler: async (response) => {
+          await verifyPaymentRequest({
+            orderId: order.id,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            signature: response.razorpay_signature,
+          });
+          cart.clearCart();
+          notify(`Payment received for ${order.id}.`);
+          navigate(`/order-success/${order.id}`);
+        },
+      });
+      checkout.open();
+    } catch (error) {
+      notify(error.message || "Could not place order.");
+    } finally {
+      setPlacingOrder(false);
+    }
   };
 
   return (
@@ -91,19 +150,19 @@ export function CheckoutPage() {
             <>
               <h3>💳 Payment Method</h3>
               <div className="payment-options">
-                {[
-                  ["📲", "UPI", "PhonePe, GPay, Paytm"],
-                  ["💳", "Credit / Debit Card", "Visa, Mastercard, RuPay"],
-                  ["🏦", "Net Banking", "All major Indian banks"],
-                  ["💵", "Cash on Delivery", "Pay when you receive"],
-                ].map(([icon, name, desc]) => (
-                  <div key={name} className={`pay-option ${name === "Cash on Delivery" ? "selected" : ""}`}>
-                    <span className="pay-icon">{icon}</span>
+                {paymentOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    className={`pay-option ${paymentMethod === option.id ? "selected" : ""}`}
+                    onClick={() => setPaymentMethod(option.id)}
+                    type="button"
+                  >
+                    <span className="pay-icon">{option.icon}</span>
                     <div>
-                      <div className="pay-name">{name}</div>
-                      <div className="pay-desc">{desc}</div>
+                      <div className="pay-name">{option.name}</div>
+                      <div className="pay-desc">{option.desc}</div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
               <div className="checkout-actions">
@@ -130,7 +189,7 @@ export function CheckoutPage() {
               </div>
               <div className="review-box">
                 <strong>Payment:</strong>
-                <p>Cash on Delivery</p>
+                <p>{paymentOptions.find((option) => option.id === paymentMethod)?.name}</p>
               </div>
               <div className="review-total">
                 <span>Order Total</span>
@@ -140,8 +199,8 @@ export function CheckoutPage() {
                 <Button className="next-btn next-btn-secondary" type="button" onClick={() => setStep(2)}>
                   ← Back
                 </Button>
-                <Button className="next-btn place-btn" type="submit" disabled={!cart.items.length}>
-                  ✅ Place Order
+                <Button className="next-btn place-btn" type="submit" disabled={!cart.items.length || placingOrder}>
+                  {placingOrder ? "Placing..." : "✅ Place Order"}
                 </Button>
               </div>
             </>

@@ -1,5 +1,10 @@
-export const cloudinary = {
-  uploader: {
-    upload: async () => ({ secure_url: "", public_id: "" }),
-  },
-};
+import { v2 as cloudinarySdk } from "cloudinary";
+
+cloudinarySdk.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
+
+export const cloudinary = cloudinarySdk;

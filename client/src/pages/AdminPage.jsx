@@ -34,7 +34,7 @@ export function AdminPage() {
   if (!user || user.role !== "admin") {
     return (
       <section className="page-content">
-        <p>Admin access required. Use `admin@grambazaar.in` / `Admin@123`.</p>
+        <p>Admin access required.</p>
       </section>
     );
   }

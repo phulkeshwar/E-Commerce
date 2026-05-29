@@ -82,6 +82,7 @@ out
 
 # Production Env
 .env
+.env.example
 .env.production
 .env.local
 .env.development.local
@@ -90,7 +91,6 @@ out
 
 # misc
 .DS_Store
-.env.example
 *.tgz
 .vscode/*
 !.vscode/settings.json

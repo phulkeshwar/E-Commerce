@@ -1,6 +1,9 @@
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import express from "express";
+import helmet from "helmet";
+import pinoHttp from "pino-http";
 import authRoutes from "./routes/auth.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import orderRoutes from "./routes/order.routes.js";
@@ -34,6 +37,9 @@ app.use(
     },
   }),
 );
+app.use(helmet());
+app.use(cookieParser());
+app.use(pinoHttp({ enabled: process.env.NODE_ENV !== "test" }));
 app.use(express.json({ limit: "2mb" }));
 app.use(apiRateLimiter);
 
