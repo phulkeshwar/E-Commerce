@@ -18,8 +18,12 @@ const docs = products.map((product) => ({
   emoji: product.emoji || "📦",
 }));
 
-await Product.deleteMany({});
-await Product.insertMany(docs);
-
-console.log(`Seeded ${docs.length} products.`);
+try {
+  await Product.deleteMany({});
+  await Product.insertMany(docs);
+  console.log(`Seeded ${docs.length} products.`);
+} catch (err) {
+  console.error("Error seeding products:", err.message || err);
+}
 process.exit(0);
+
