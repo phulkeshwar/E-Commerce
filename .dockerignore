@@ -1,0 +1,7 @@
+node_modules
+.git
+.github
+learning
+.env
+.env.local
+*.log

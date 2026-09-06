@@ -22,6 +22,16 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -35,10 +45,11 @@ jobs:
       - name: Install Server Dependencies
         run: npm ci --prefix server
 
-      - name: Execute Server Integration Tests
+      - name: Execute Server Integration Tests (with Redis Caching Tier)
         env:
           NODE_ENV: test
           MONGODB_URI: mongodb://127.0.0.1:27017/GaramBazaar_test
+          REDIS_URL: redis://127.0.0.1:6379
           JWT_ACCESS_SECRET: ${{ secrets.JWT_ACCESS_SECRET || 'test_jwt_access_secret_32_characters_minimum' }}
           JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET || 'test_jwt_refresh_secret_32_characters_minimum' }}
           RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID || 'rzp_test_ci_mock_placeholder_key_id' }}
@@ -47,8 +58,8 @@ jobs:
           BCRYPT_SALT_ROUNDS: 4
         run: npm test --prefix server
 
-  build-client:
-    name: Frontend Build & Bundle Verification
+  test-and-build-client:
+    name: Frontend Unit Tests & Build Verification
     runs-on: ubuntu-latest
 
     steps:
@@ -63,6 +74,9 @@ jobs:
 
       - name: Install Client Dependencies
         run: npm ci --prefix client
+
+      - name: Execute Client Unit Tests
+        run: npm test --prefix client
 
       - name: Build Vite Production Bundle
         run: npm run build --prefix client

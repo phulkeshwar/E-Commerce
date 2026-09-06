@@ -1,8 +1,9 @@
-import test from "node:test";
+import test, { after } from "node:test";
 import assert from "node:assert";
 import mongoose from "mongoose";
 import app from "../app.js";
 import { connectDB } from "../config/db.js";
+import { redisClient, flushCachePattern } from "../utils/cache.js";
 import { User } from "../models/User.model.js";
 import { Product } from "../models/Product.model.js";
 import { Order } from "../models/Order.model.js";
@@ -493,6 +494,9 @@ test("Integration Test Suite: Auth, Webhooks, and Multi-Vendor Order Isolation",
   });
 
   await t.test("13. Response Caching: Catalog endpoints return X-Cache MISS then HIT", async () => {
+    // Flush any leftover cache keys in Redis/Memory before testing clean miss/hit transitions
+    await flushCachePattern("catalog:*");
+
     // Initial fetch (unauthenticated) -> MISS
     const res1 = await fetch(`${baseUrl}/products`);
     assert.strictEqual(res1.status, 200);
@@ -511,5 +515,17 @@ test("Integration Test Suite: Auth, Webhooks, and Multi-Vendor Order Isolation",
     const catRes2 = await fetch(`${baseUrl}/categories`);
     assert.strictEqual(catRes2.status, 200);
     assert.strictEqual(catRes2.headers.get("x-cache"), "HIT");
+  });
+
+  after(async () => {
+    if (server) {
+      await new Promise((resolve) => server.close(resolve));
+    }
+    await mongoose.connection.close();
+    if (redisClient) {
+      try {
+        await redisClient.quit();
+      } catch {}
+    }
   });
 });
