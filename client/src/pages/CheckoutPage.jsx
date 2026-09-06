@@ -3,11 +3,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Modal } from "../components/ui/Modal";
-import { createPaymentOrderRequest, verifyPaymentRequest, verifyUpiPaymentRequest } from "../api/payment.api";
+import { createPaymentOrderRequest, verifyPaymentRequest } from "../api/payment.api";
 import { getAddressesRequest, addAddressRequest } from "../api/auth.api";
 import { getSettingsRequest } from "../api/settings.api";
 import { useAppContext } from "../hooks/useAppContext";
 import { formatCurrency } from "../utils/formatCurrency";
+import { validatePincode, lookupPincode } from "../utils/validatePincode";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 
 const paymentOptions = [
@@ -237,8 +238,8 @@ export function CheckoutPage() {
       notify("State is required.");
       return;
     }
-    if (!form.pincode?.trim()) {
-      notify("Pincode is required.");
+    if (!form.pincode?.trim() || !validatePincode(form.pincode.trim())) {
+      notify("Please enter a valid 6-digit Indian PIN code.");
       return;
     }
 
@@ -602,8 +603,26 @@ export function CheckoutPage() {
                 <Input label="Email address" type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} required />
               </div>
               <div className="form-row">
-                <Input label="Phone" value={form.phone} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} required />
-                <Input label="Pincode" value={form.pincode} onChange={(event) => setForm((current) => ({ ...current, pincode: event.target.value }))} required />
+                <Input
+                  label="Pincode"
+                  value={form.pincode}
+                  maxLength={6}
+                  placeholder="6-digit PIN"
+                  onChange={(event) => {
+                    const val = event.target.value.replace(/\D/g, "").slice(0, 6);
+                    setForm((current) => {
+                      const next = { ...current, pincode: val };
+                      if (val.length === 6 && validatePincode(val)) {
+                        const info = lookupPincode(val);
+                        if (info.valid && !current.state) {
+                          next.state = info.state;
+                        }
+                      }
+                      return next;
+                    });
+                  }}
+                  required
+                />
               </div>
               <div className="form-row full">
                 <Input label="Address line" value={form.line1} onChange={(event) => setForm((current) => ({ ...current, line1: event.target.value }))} required />

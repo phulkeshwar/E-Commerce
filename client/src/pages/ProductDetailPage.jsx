@@ -8,7 +8,7 @@ import { useAppContext } from "../hooks/useAppContext";
 import { useProductDetail } from "../hooks/useProducts";
 import { useReviews } from "../hooks/useReviews";
 import { formatCurrency } from "../utils/formatCurrency";
-import { validatePincode } from "../utils/validatePincode";
+import { validatePincode, lookupPincode } from "../utils/validatePincode";
 import { getProductFAQsRequest, createQuestionRequest } from "../api/faq.api";
 import { notifyMeStockRequest } from "../api/products.api";
 import { ReportModal } from "../components/ui/ReportModal";
@@ -609,15 +609,16 @@ export function ProductDetailPage() {
                                  focus:outline-none focus:border-[#c4622d] focus:ring-1 focus:ring-[#c4622d]/30"
                     />
                     <button
-                      onClick={() =>
-                        setPinMessage(
-                          validatePincode(pincode)
-                            ? "✅ Delivery by Tue, 2–4 days."
-                            : "❌ Enter valid 6-digit pincode."
-                        )
-                      }
+                      onClick={() => {
+                        const res = lookupPincode(pincode);
+                        if (res.valid) {
+                          setPinMessage(`✅ ${res.estimatedDeliveryText} (${res.region}, ${res.state}) • ${res.fastestDelivery}`);
+                        } else {
+                          setPinMessage(`❌ ${res.message}`);
+                        }
+                      }}
                       className="bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold
-                                 px-4 py-2 rounded-lg transition-colors"
+                                 px-4 py-2 rounded-lg transition-colors cursor-pointer"
                     >
                       Check
                     </button>

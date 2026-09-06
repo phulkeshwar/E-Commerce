@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, lazy, Suspense, useCallback } from "react";
+import { useEffect, useMemo, useState, lazy, Suspense, useCallback, useRef } from "react";
 import {
   BrowserRouter,
   Route,
@@ -133,35 +133,68 @@ export default function App() {
     }
   }, [auth.token]);
 
+  const ordersReloadRef = useRef(orders?.reload);
+  useEffect(() => {
+    ordersReloadRef.current = orders?.reload;
+  }, [orders?.reload]);
+
   useEffect(() => {
     if (!auth.token) return;
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5001";
-    const eventSource = new EventSource(`${backendUrl}/api/notifications/stream`, { withCredentials: true });
+    let eventSource = null;
+    let reconnectTimeout = null;
+    let reconnectDelay = 1000;
+    let isMounted = true;
 
-    eventSource.onmessage = (event) => {
-      try {
-        if (event.data === ":") return; // Keep-alive comment
-        const data = JSON.parse(event.data);
-        if (data && data.title) {
-          setToastMessage(`🔔 ${data.title}: ${data.message}`);
-          if (orders && typeof orders.reload === "function") {
-            orders.reload().catch(() => {});
+    const connect = () => {
+      if (!isMounted || !auth.token) return;
+
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:5001";
+      eventSource = new EventSource(`${backendUrl}/api/notifications/stream`, { withCredentials: true });
+
+      eventSource.onopen = () => {
+        reconnectDelay = 1000; // Reset delay on successful connection
+      };
+
+      eventSource.onmessage = (event) => {
+        try {
+          if (event.data === ":") return; // Keep-alive comment
+          const data = JSON.parse(event.data);
+          if (data && data.title) {
+            setToastMessage(`🔔 ${data.title}: ${data.message}`);
+            if (ordersReloadRef.current && typeof ordersReloadRef.current === "function") {
+              ordersReloadRef.current().catch(() => {});
+            }
           }
+        } catch (err) {
+          // Quietly ignore malformed messages
         }
-      } catch (err) {
-        // Quietly fail JSON parsing for non-json
-      }
+      };
+
+      eventSource.onerror = () => {
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+        if (isMounted && auth.token) {
+          reconnectTimeout = setTimeout(() => {
+            reconnectDelay = Math.min(reconnectDelay * 2, 30000); // Exponential backoff up to 30s
+            connect();
+          }, reconnectDelay);
+        }
+      };
     };
 
-    eventSource.onerror = (err) => {
-      eventSource.close();
-    };
+    connect();
 
     return () => {
-      eventSource.close();
+      isMounted = false;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      if (eventSource) {
+        eventSource.close();
+      }
     };
-  }, [auth.token, orders]);
+  }, [auth.token]);
 
   const toggleWishlist = async (id) => {
     if (auth.token) {
