@@ -440,4 +440,76 @@ test("Integration Test Suite: Auth, Webhooks, and Multi-Vendor Order Isolation",
     assert.strictEqual(data.success, true);
     assert.strictEqual(data.message, "Webhook processed.");
   });
+
+  await t.test("12. Batch Operations: Batch cart update and multi-item order execution", async () => {
+    // 1. Update Cart with multiple products
+    const cartRes = await fetch(`${baseUrl}/cart`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: customerCookie,
+      },
+      body: JSON.stringify({
+        items: [
+          { productId: sellerAProduct._id.toString(), quantity: 2 },
+          { productId: sellerBProduct._id.toString(), quantity: 3 },
+        ],
+      }),
+    });
+
+    assert.strictEqual(cartRes.status, 200);
+    const cartData = await cartRes.json();
+    assert.strictEqual(cartData.success, true);
+    assert.strictEqual(cartData.data.items.length, 2);
+
+    // 2. Place Order with both items
+    const orderRes = await fetch(`${baseUrl}/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: customerCookie,
+      },
+      body: JSON.stringify({
+        items: [
+          { productId: sellerAProduct._id.toString(), quantity: 1 },
+          { productId: sellerBProduct._id.toString(), quantity: 2 },
+        ],
+        shippingAddress: {
+          name: "Multi Vendor Buyer",
+          phone: "9876543210",
+          line1: "42 MG Road",
+          city: "Bengaluru",
+          state: "Karnataka",
+          pincode: "560001",
+        },
+        paymentMethod: "cod",
+      }),
+    });
+
+    assert.strictEqual(orderRes.status, 201);
+    const orderData = await orderRes.json();
+    assert.strictEqual(orderData.success, true);
+    assert.strictEqual(orderData.data.order.items.length, 2);
+  });
+
+  await t.test("13. Response Caching: Catalog endpoints return X-Cache MISS then HIT", async () => {
+    // Initial fetch (unauthenticated) -> MISS
+    const res1 = await fetch(`${baseUrl}/products`);
+    assert.strictEqual(res1.status, 200);
+    assert.strictEqual(res1.headers.get("x-cache"), "MISS");
+
+    // Second fetch -> HIT
+    const res2 = await fetch(`${baseUrl}/products`);
+    assert.strictEqual(res2.status, 200);
+    assert.strictEqual(res2.headers.get("x-cache"), "HIT");
+
+    // Category endpoint caching
+    const catRes1 = await fetch(`${baseUrl}/categories`);
+    assert.strictEqual(catRes1.status, 200);
+    assert.strictEqual(catRes1.headers.get("x-cache"), "MISS");
+
+    const catRes2 = await fetch(`${baseUrl}/categories`);
+    assert.strictEqual(catRes2.status, 200);
+    assert.strictEqual(catRes2.headers.get("x-cache"), "HIT");
+  });
 });

@@ -102,10 +102,15 @@ export const getProducts = async (req, res) => {
     ? { score: { $meta: "textScore" } }
     : {};
 
+  const featuredQuery = { isFeatured: true, isPublished: true };
+  if (mongoQuery.productType) {
+    featuredQuery.productType = mongoQuery.productType;
+  }
+
   const [products, totalItems, featured] = await Promise.all([
     Product.find(mongoQuery, queryProj).sort(sortOption).skip(skip).limit(limit),
     Product.countDocuments(mongoQuery),
-    Product.find({ isFeatured: true, isPublished: true, productType: mongoQuery.productType }).sort({ rating: -1 }).limit(12),
+    Product.find(featuredQuery).sort({ rating: -1 }).limit(12),
   ]);
 
   const totalPages = Math.ceil(totalItems / limit);

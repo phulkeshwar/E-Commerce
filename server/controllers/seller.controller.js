@@ -7,6 +7,7 @@ import { slugify } from "../utils/slugify.js";
 import { Wishlist } from "../models/Wishlist.model.js";
 import { Coupon } from "../models/Coupon.model.js";
 import { processStockAlerts } from "../utils/stockAlertHelper.js";
+import { invalidateCatalogCache } from "../utils/cache.js";
 
 export const getSellerDashboard = async (req, res) => {
   const sellerId = req.user._id;
@@ -82,6 +83,7 @@ export const createSellerProduct = async (req, res) => {
     isPublished: req.body.isPublished ?? true,
   });
 
+  invalidateCatalogCache();
   return res.status(201).json(new ApiResponse(true, "Product created.", { product: product.toClient() }));
 };
 
@@ -149,6 +151,7 @@ export const updateSellerProduct = async (req, res) => {
     }
   }
 
+  invalidateCatalogCache();
   return res.json(new ApiResponse(true, "Product updated.", { product: product.toClient() }));
 };
 
@@ -166,6 +169,7 @@ export const deleteSellerProduct = async (req, res) => {
   }
 
   await Product.findByIdAndDelete(req.params.id);
+  invalidateCatalogCache();
   return res.json(new ApiResponse(true, "Product deleted."));
 };
 

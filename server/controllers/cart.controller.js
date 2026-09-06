@@ -35,17 +35,45 @@ export const getCart = async (req, res) => {
 
 export const updateCart = async (req, res) => {
   const rawItems = Array.isArray(req.body.items) ? req.body.items : [];
+
+  const rawProductIds = rawItems.map((item) => item.productId).filter(Boolean);
+  const objectIds = [];
+  const legacyIds = [];
+
+  for (const id of rawProductIds) {
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      objectIds.push(id);
+    } else {
+      legacyIds.push(id);
+    }
+  }
+
+  let legacyProducts = [];
+  if (legacyIds.length > 0) {
+    legacyProducts = await Product.find({ legacyId: { $in: legacyIds } });
+  }
+
+  const allTargetIds = [
+    ...objectIds,
+    ...legacyProducts.map((p) => p._id),
+  ];
+
+  const products = await Product.find({ _id: { $in: allTargetIds } });
+  const productMap = new Map();
+  for (const p of products) {
+    productMap.set(p._id.toString(), p);
+    if (p.legacyId) {
+      productMap.set(p.legacyId, p);
+    }
+  }
+
   const normalized = [];
 
   for (const item of rawItems) {
-    const productId = await resolveProductId(item.productId);
+    const rawId = item.productId?.toString();
+    const product = productMap.get(rawId);
     const quantity = Math.max(1, Math.min(Number(item.quantity || 1), 99));
 
-    if (!productId) {
-      continue;
-    }
-
-    const product = await Product.findById(productId);
     if (!product || !product.inStock) {
       continue;
     }
@@ -61,13 +89,13 @@ export const updateCart = async (req, res) => {
       }
     }
 
-    normalized.push({ productId, quantity, variantName: item.variantName });
+    normalized.push({ productId: product._id, quantity, variantName: item.variantName });
   }
 
   await Cart.findOneAndUpdate(
     { userId: req.user._id },
     { $set: { items: normalized } },
-    { upsert: true, new: true },
+    { upsert: true, returnDocument: "after" },
   );
 
   res.json(new ApiResponse(true, "Cart updated.", { items: await buildCartItems(req.user._id) }));

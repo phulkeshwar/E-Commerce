@@ -1,5 +1,6 @@
 import { Category } from "../models/Category.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { invalidateCatalogCache } from "../utils/cache.js";
 
 export const getCategories = async (req, res) => {
   const categories = await Category.find().sort({ name: 1 });
@@ -19,6 +20,7 @@ export const createCategory = async (req, res) => {
   }
 
   const category = await Category.create({ name: name.trim(), emoji: emoji || "📦", slug });
+  invalidateCatalogCache();
   res.status(201).json(new ApiResponse(true, "Category created successfully.", category.toClient()));
 };
 
@@ -49,6 +51,7 @@ export const updateCategory = async (req, res) => {
   }
 
   await category.save();
+  invalidateCatalogCache();
   res.json(new ApiResponse(true, "Category updated successfully.", category.toClient()));
 };
 
@@ -60,5 +63,6 @@ export const deleteCategory = async (req, res) => {
   }
   
   await Category.deleteOne({ _id: id });
+  invalidateCatalogCache();
   res.json(new ApiResponse(true, "Category deleted successfully.", { id }));
 };

@@ -17,6 +17,10 @@ import { optimizeCloudinaryUrl } from "../utils/optimizeImage";
 import { TrackHistoryModal } from "../components/product/TrackHistoryModal";
 import { trackAffiliateClickRequest } from "../api/affiliate.api";
 import { apiRequest } from "../api/axios";
+import { ProductOffers } from "../components/product/ProductOffers";
+import { ProductSpecs } from "../components/product/ProductSpecs";
+import { ProductAiSummary } from "../components/product/ProductAiSummary";
+import { ProductFaqSection } from "../components/product/ProductFaqSection";
 
 // Star SVGs
 function Star({ filled, half }) {
@@ -544,58 +548,18 @@ export function ProductDetailPage() {
             <p className="text-gray-600 text-[0.88rem] leading-relaxed">{product.description}</p>
 
             {/* Offers */}
-            <div className="bg-[#f5f0e8] rounded-xl border border-[#e0d5c5] p-4">
-              <p className="font-bold text-[#2c1a0e] text-sm mb-3">🏷️ Available Offers</p>
-              <div className="space-y-2.5">
-                {(offersExpanded ? offers : offers.slice(0, 2)).map((o) => (
-                  <div key={o.title} className="flex gap-2.5">
-                    <span className="text-base flex-shrink-0">{o.icon}</span>
-                    <p className="text-[0.78rem] text-gray-700 leading-snug">
-                      <strong className="text-gray-900">{o.title}: </strong>{o.desc}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              {offers.length > 2 && (
-                <button
-                  onClick={() => setOffersExpanded(!offersExpanded)}
-                  className="text-[#c4622d] text-[0.78rem] font-semibold hover:underline mt-2"
-                >
-                  {offersExpanded ? "See less" : `+${offers.length - 2} more offers`}
-                </button>
-              )}
-            </div>
+            <ProductOffers
+              offers={offers}
+              offersExpanded={offersExpanded}
+              setOffersExpanded={setOffersExpanded}
+            />
 
             {/* Specifications (accordion) */}
-            <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
-              <button
-                onClick={() => setSpecsOpen(!specsOpen)}
-                className="w-full flex items-center justify-between px-4 py-3
-                           font-bold text-gray-800 text-sm hover:bg-gray-50 transition-colors"
-              >
-                <span>📋 Product Specifications</span>
-                <svg viewBox="0 0 20 20" fill="currentColor"
-                  className={`w-4 h-4 transition-transform ${specsOpen ? "rotate-180" : ""}`}>
-                  <path fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd" />
-                </svg>
-              </button>
-              {specsOpen && (
-                <div className="border-t border-gray-100">
-                  <table className="w-full text-sm">
-                    <tbody>
-                      {Object.entries(product.specifications || {}).map(([key, val], idx) => (
-                        <tr key={key} className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                          <td className="px-4 py-2.5 font-semibold text-gray-600 w-2/5 border-b border-gray-100">{key}</td>
-                          <td className="px-4 py-2.5 text-gray-800 border-b border-gray-100">{val}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+            <ProductSpecs
+              specifications={product.specifications}
+              specsOpen={specsOpen}
+              setSpecsOpen={setSpecsOpen}
+            />
           </div>
 
           {/* ── Sticky Buy Panel ── */}
@@ -890,63 +854,13 @@ export function ProductDetailPage() {
           )}
 
           {/* AI Review Summary */}
-          {reviews.length >= 5 && (
-            <div className="mb-6 p-6 rounded-2xl bg-gradient-to-br from-amber-50/50 to-orange-50/30 border border-amber-200/60 shadow-sm backdrop-blur-md relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl">✨</span>
-                <h3 className="text-sm font-black text-[#2c1a0e] tracking-tight uppercase">AI Review Summary</h3>
-                <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full ml-auto">
-                  Powered by Gemini
-                </span>
-              </div>
-              
-              {loadingSummary ? (
-                <div className="py-6 flex flex-col items-center justify-center gap-2 text-xs font-bold text-gray-500">
-                  <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                  Analyzing {reviews.length} reviews...
-                </div>
-              ) : summaryError ? (
-                <div className="text-xs text-red-600 font-semibold flex items-center gap-2 py-2">
-                  <span>⚠️</span> {summaryError}
-                  <button type="button" onClick={fetchSummary} className="underline text-amber-700 hover:text-amber-800 ml-auto cursor-pointer border-0 bg-transparent font-bold">Retry</button>
-                </div>
-              ) : summaryData ? (
-                <div className="space-y-4 text-xs">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {summaryData.pros?.length > 0 && (
-                      <div>
-                        <h4 className="font-bold text-emerald-800 flex items-center gap-1.5 mb-2">
-                          👍 Pros
-                        </h4>
-                        <ul className="list-disc pl-4 space-y-1 text-gray-700 font-medium">
-                          {summaryData.pros.map((p, i) => <li key={i}>{p}</li>)}
-                        </ul>
-                      </div>
-                    )}
-                    {summaryData.cons?.length > 0 && (
-                      <div>
-                        <h4 className="font-bold text-rose-800 flex items-center gap-1.5 mb-2">
-                          👎 Cons
-                        </h4>
-                        <ul className="list-disc pl-4 space-y-1 text-gray-700 font-medium">
-                          {summaryData.cons.map((c, i) => <li key={i}>{c}</li>)}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                  {summaryData.verdict && (
-                    <div className="pt-3 border-t border-amber-200/50">
-                      <h4 className="font-bold text-[#2c1a0e] mb-1">📢 AI Verdict</h4>
-                      <p className="text-gray-700 italic font-semibold leading-relaxed">
-                        "{summaryData.verdict}"
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : null}
-            </div>
-          )}
+          <ProductAiSummary
+            reviewsCount={reviews.length}
+            loadingSummary={loadingSummary}
+            summaryError={summaryError}
+            summaryData={summaryData}
+            onRetry={fetchSummary}
+          />
 
           {/* Review List */}
           <div className="space-y-4">
@@ -964,83 +878,16 @@ export function ProductDetailPage() {
         </section>
 
         {/* ── FAQ / Q&A Section ── */}
-        <section className="mt-8 bg-white rounded-2xl border border-gray-200 p-5 md:p-8 text-left">
-          <div className="mb-6">
-            <p className="text-[0.68rem] font-bold uppercase tracking-widest text-[#9b6b3a] mb-0.5">
-              Have Questions?
-            </p>
-            <h2 className="text-xl font-bold text-[#2c1a0e]">Customer Questions & Answers</h2>
-          </div>
-
-          {/* Ask a question form */}
-          {user?.role === "seller" ? (
-            <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 mb-6 text-xs font-semibold leading-relaxed shadow-sm">
-              🏪 Merchant Viewing Mode: Sellers cannot submit product questions.
-            </div>
-          ) : isAuthenticated ? (
-            <form onSubmit={handleQuestionSubmit} className="mb-8 bg-gray-50 p-4 rounded-xl border border-gray-100">
-              <label className="text-xs font-bold text-gray-600 block mb-1.5">Ask a question about this product</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="e.g., Is this product organic/gluten-free?"
-                  value={questionDraft}
-                  onChange={(e) => setQuestionDraft(e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-[#c4622d] transition-all bg-white"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={submittingQuestion || !questionDraft.trim()}
-                  className="bg-[#c4622d] hover:bg-[#a95223] disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-all shadow-sm"
-                >
-                  {submittingQuestion ? "Submitting..." : "Ask Question"}
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-6 text-sm text-blue-700">
-              <button onClick={() => navigate("/auth")} className="font-semibold underline">Sign in</button> to ask a question.
-            </div>
-          )}
-
-          {/* Questions list */}
-          <div className="space-y-6">
-            {faqs.map((faq) => (
-              <div key={faq.id} className="pb-5 border-b border-gray-100 last:border-0 last:pb-0">
-                <div className="flex gap-3 items-start">
-                  <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded shrink-0">Q</span>
-                  <div className="space-y-1">
-                    <p className="font-bold text-gray-900 text-sm">{faq.question}</p>
-                    <p className="text-[0.68rem] text-gray-400 font-semibold">Asked by {faq.buyerName} on {new Date(faq.createdAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 items-start mt-3 pl-2 border-l-2 border-purple-200 text-left">
-                  <span className="text-xs font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded shrink-0">A</span>
-                  <div className="space-y-1">
-                    {faq.isAnswered ? (
-                      <>
-                        <p className="text-gray-700 text-sm leading-relaxed">{faq.answer}</p>
-                        <p className="text-[0.68rem] text-gray-400 font-semibold">
-                          Answered by {faq.answeredByName || "Merchant"}
-                        </p>
-                      </>
-                    ) : (
-                      <p className="text-gray-400 text-xs italic">This question hasn't been answered by the merchant yet.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-            
-            {faqs.length === 0 && (
-              <p className="text-center text-gray-500 text-sm py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                No questions asked about this product yet. Ask yours above!
-              </p>
-            )}
-          </div>
-        </section>
+        <ProductFaqSection
+          faqs={faqs}
+          user={user}
+          isAuthenticated={isAuthenticated}
+          questionDraft={questionDraft}
+          setQuestionDraft={setQuestionDraft}
+          submittingQuestion={submittingQuestion}
+          handleQuestionSubmit={handleQuestionSubmit}
+          navigate={navigate}
+        />
 
         {/* ── Related Products ── */}
         {relatedProducts.length > 0 && (

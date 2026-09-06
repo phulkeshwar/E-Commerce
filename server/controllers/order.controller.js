@@ -65,17 +65,53 @@ const calculateDiscount = async (couponCode, orderItems) => {
 };
 
 const buildOrderItems = async (rawItems) => {
+  if (!Array.isArray(rawItems) || rawItems.length === 0) {
+    throw new Error("One or more products were not found.");
+  }
+
+  // Separate ObjectIds and potential legacy string IDs
+  const rawProductIds = rawItems.map((item) => item.productId).filter(Boolean);
+  const objectIds = [];
+  const legacyIds = [];
+
+  for (const id of rawProductIds) {
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      objectIds.push(id);
+    } else {
+      legacyIds.push(id);
+    }
+  }
+
+  // Batch query legacy IDs if any exist
+  let legacyProducts = [];
+  if (legacyIds.length > 0) {
+    legacyProducts = await Product.find({ legacyId: { $in: legacyIds } });
+  }
+
+  const allTargetIds = [
+    ...objectIds,
+    ...legacyProducts.map((p) => p._id),
+  ];
+
+  // Batch fetch all required products in a single database query
+  const products = await Product.find({ _id: { $in: allTargetIds } });
+
+  // Index products by both _id and legacyId for fast O(1) in-memory lookup
+  const productMap = new Map();
+  for (const p of products) {
+    productMap.set(p._id.toString(), p);
+    if (p.legacyId) {
+      productMap.set(p.legacyId, p);
+    }
+  }
+
   const items = [];
 
   for (const item of rawItems) {
-    const productId = await resolveProductId(item.productId);
     const quantity = Math.max(1, Math.min(Number(item.quantity || 1), 99));
+    const rawId = item.productId?.toString();
+    const product = productMap.get(rawId);
 
-    if (!productId) {
-      throw new Error("One or more products were not found.");
-    }
-
-    const product = await Product.findById(productId);
     if (!product) {
       throw new Error("One or more products were not found.");
     }

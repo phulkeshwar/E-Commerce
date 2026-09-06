@@ -12,6 +12,7 @@ import { Report } from "../models/Report.model.js";
 import { Wishlist } from "../models/Wishlist.model.js";
 import { processStockAlerts } from "../utils/stockAlertHelper.js";
 import { Settings } from "../models/Settings.model.js";
+import { invalidateCatalogCache } from "../utils/cache.js";
 
 export const getDashboard = async (_req, res) => {
   const [revenueResult, orders, productCount, userCount, products, recentOrders, topProducts, reviews] =
@@ -141,6 +142,7 @@ export const createProduct = async (req, res) => {
     isPublished: req.body.isPublished ?? true,
   });
 
+  invalidateCatalogCache();
   res.status(201).json(new ApiResponse(true, "Product created.", { product: product.toClient() }));
 };
 
@@ -203,6 +205,7 @@ export const updateProduct = async (req, res) => {
     }
   }
 
+  invalidateCatalogCache();
   res.json(new ApiResponse(true, "Product updated.", { product: product.toClient() }));
 };
 
