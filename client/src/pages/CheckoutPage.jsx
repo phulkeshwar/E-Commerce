@@ -433,7 +433,9 @@ export function CheckoutPage() {
       if (paymentMethod === "cod") {
         cart.clearCart();
         notify(`Order ${order.id} placed.`);
-        navigate(`/order-success/${order.id}`, { state: { justPlaced: true } });
+        navigate(`/order-success/${order.id}`, {
+          state: { justPlaced: true, guestAccessToken: order.guestAccessToken },
+        });
         return;
       }
 
@@ -461,7 +463,9 @@ export function CheckoutPage() {
             });
             cart.clearCart();
             notify(`Payment received for ${order.id}.`);
-            navigate(`/order-success/${order.id}`, { state: { justPlaced: true } });
+            navigate(`/order-success/${order.id}`, {
+              state: { justPlaced: true, guestAccessToken: order.guestAccessToken },
+            });
           },
         };
 
@@ -514,7 +518,9 @@ export function CheckoutPage() {
       notify("Payment verified successfully (Simulated)!");
       const targetOrder = simulatingOrder;
       setSimulatingOrder(null);
-      navigate(`/order-success/${targetOrder.orderNumber}`, { state: { justPlaced: true } });
+      navigate(`/order-success/${targetOrder.orderNumber}`, {
+        state: { justPlaced: true, guestAccessToken: targetOrder.guestAccessToken },
+      });
     } catch (err) {
       notify(err.message || "Failed to verify simulated payment.");
     } finally {

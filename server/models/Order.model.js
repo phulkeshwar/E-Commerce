@@ -57,6 +57,7 @@ const orderSchema = new mongoose.Schema(
     statusHistory: { type: [statusHistorySchema], default: [] },
     deliverySlot: { type: String, default: "" },
     estimatedDeliveryDate: { type: Date },
+    guestAccessToken: { type: String, select: false },
   },
   { timestamps: true },
 );
@@ -65,10 +66,12 @@ orderSchema.index({ status: 1, createdAt: -1 });
 orderSchema.index({ "items.productId": 1 });
 orderSchema.index({ "payment.razorpayOrderId": 1 });
 orderSchema.index({ "payment.razorpayPaymentId": 1 });
+orderSchema.index({ guestAccessToken: 1 }, { sparse: true });
 
 
 orderSchema.methods.toClient = function toClient() {
   const raw = this.toObject();
+  delete raw.guestAccessToken;
   return {
     ...raw,
     id: this.orderNumber,

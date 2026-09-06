@@ -86,9 +86,10 @@ export const razorpayWebhook = async (req, res) => {
     return res.status(500).json(new ApiResponse(false, "Webhook configuration error."));
   }
 
-  // Verify signature
+  // Verify signature using raw body buffer
+  const payloadToVerify = req.rawBody || JSON.stringify(req.body);
   const shasum = crypto.createHmac("sha256", secret);
-  shasum.update(JSON.stringify(req.body));
+  shasum.update(payloadToVerify);
   const digest = shasum.digest("hex");
 
   if (!signature || signature !== digest) {

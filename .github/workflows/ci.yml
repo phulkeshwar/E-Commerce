@@ -39,11 +39,11 @@ jobs:
         env:
           NODE_ENV: test
           MONGODB_URI: mongodb://127.0.0.1:27017/GaramBazaar_test
-          JWT_ACCESS_SECRET: test_jwt_access_secret_32_characters_minimum
-          JWT_REFRESH_SECRET: test_jwt_refresh_secret_32_characters_minimum
-          RAZORPAY_KEY_ID: rzp_test_SvEh0YYYQInBbE
-          RAZORPAY_KEY_SECRET: J75JlaKrhqpUUGL9KC6b0n0i
-          RAZORPAY_WEBHOOK_SECRET: myGaramBazaarWebhook@2026!secure
+          JWT_ACCESS_SECRET: ${{ secrets.JWT_ACCESS_SECRET || 'test_jwt_access_secret_32_characters_minimum' }}
+          JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET || 'test_jwt_refresh_secret_32_characters_minimum' }}
+          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID || 'rzp_test_ci_mock_placeholder_key_id' }}
+          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET || 'ci_mock_placeholder_razorpay_secret_key' }}
+          RAZORPAY_WEBHOOK_SECRET: ${{ secrets.RAZORPAY_WEBHOOK_SECRET || 'ci_mock_placeholder_webhook_secret_key' }}
           BCRYPT_SALT_ROUNDS: 4
         run: npm test --prefix server
 

@@ -293,4 +293,151 @@ test("Integration Test Suite: Auth, Webhooks, and Multi-Vendor Order Isolation",
     const rechecked = await Product.findById(scarceProduct._id);
     assert.strictEqual(rechecked.stockCount, 1);
   });
+
+  await t.test("9. IDOR Protection: Guest orders require valid guestAccessToken to view and cancel", async () => {
+    const sellerA = await User.findOne({ email: "sellerA@test.com" });
+    const product = await Product.create({
+      name: "Guest Purchasable Item",
+      slug: "guest-purchasable-item",
+      description: "Available item",
+      category: "Pantry",
+      price: 250,
+      seller: sellerA._id,
+      inStock: true,
+      stockCount: 10,
+      isPublished: true,
+    });
+
+    // 1. Create a guest order (no auth cookie)
+    const createRes = await fetch(`${baseUrl}/orders`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: [{ productId: product._id.toString(), quantity: 1 }],
+        shippingAddress: {
+          name: "Guest Shopper",
+          phone: "9123456780",
+          line1: "404 Stealth Lane",
+          city: "Bengaluru",
+          state: "Karnataka",
+          pincode: "560001",
+        },
+        paymentMethod: "cod",
+      }),
+    });
+
+    assert.strictEqual(createRes.status, 201);
+    const createData = await createRes.json();
+    const guestToken = createData.data?.guestAccessToken;
+    assert.ok(guestToken, "Guest order response should provide a guestAccessToken");
+    const guestOrderNum = createData.data.order.orderNumber || createData.data.order.id;
+
+    // 2. Unauthenticated attacker attempts to read guest order without token -> 403 Forbidden
+    const unauthReadRes = await fetch(`${baseUrl}/orders/${guestOrderNum}`);
+    assert.strictEqual(unauthReadRes.status, 403, "Unauthenticated fetch without guestToken must be 403 Forbidden");
+
+    // 3. Unauthenticated attacker attempts to cancel guest order without token -> 403 Forbidden
+    const unauthCancelRes = await fetch(`${baseUrl}/orders/${guestOrderNum}/cancel`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+    });
+    assert.strictEqual(unauthCancelRes.status, 403, "Unauthenticated cancel without guestToken must be 403 Forbidden");
+
+    // 4. Fetch guest order with valid guestToken -> 200 OK
+    const authReadRes = await fetch(`${baseUrl}/orders/${guestOrderNum}?guestToken=${guestToken}`);
+    assert.strictEqual(authReadRes.status, 200, "Fetch with valid guestToken must return 200 OK");
+    const authReadData = await authReadRes.json();
+    assert.strictEqual(authReadData.data.order.id, guestOrderNum);
+
+    // 5. Cancel guest order with valid guestToken -> 200 OK
+    const authCancelRes = await fetch(`${baseUrl}/orders/${guestOrderNum}/cancel`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "x-guest-token": guestToken,
+      },
+    });
+    assert.strictEqual(authCancelRes.status, 200, "Cancel with valid guestToken must return 200 OK");
+    const authCancelData = await authCancelRes.json();
+    assert.strictEqual(authCancelData.data.order.status, "Cancelled");
+  });
+
+  await t.test("10. Security: Password reset tokens are stored as SHA-256 hashes", async () => {
+    // Set up user with a known raw reset token
+    const crypto = await import("crypto");
+    const rawResetToken = "raw_sample_secret_token_1234567890abcdef";
+    const hashedResetToken = crypto.createHash("sha256").update(rawResetToken).digest("hex");
+
+    const user = await User.findOne({ email: "customer@test.com" });
+    user.passwordResetToken = hashedResetToken;
+    user.passwordResetExpires = Date.now() + 3600000;
+    await user.save();
+
+    // Verify stored token in MongoDB is the 64-char SHA-256 hash, not the raw token
+    const reloadedUser = await User.findOne({ email: "customer@test.com" });
+    assert.strictEqual(reloadedUser.passwordResetToken, hashedResetToken);
+    assert.strictEqual(reloadedUser.passwordResetToken.length, 64);
+
+    // Attempting to reset using the hash string itself must fail (server hashes the input)
+    const failRes = await fetch(`${baseUrl}/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: hashedResetToken,
+        password: "brandNewSecurePassword123!",
+      }),
+    });
+    assert.strictEqual(failRes.status, 400);
+
+    // Resetting with the raw unhashed token succeeds
+    const successRes = await fetch(`${baseUrl}/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: rawResetToken,
+        password: "brandNewSecurePassword123!",
+      }),
+    });
+    assert.strictEqual(successRes.status, 200);
+
+    // Token must be cleared after use
+    const updatedUser = await User.findOne({ email: "customer@test.com" });
+    assert.strictEqual(updatedUser.passwordResetToken, undefined);
+  });
+
+  await t.test("11. Webhook Raw Buffer: Valid HMAC SHA-256 signature passes verification", async () => {
+    const crypto = await import("crypto");
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || "ci_mock_placeholder_webhook_secret_key";
+
+    const payload = JSON.stringify({
+      event: "payment.captured",
+      payload: {
+        payment: {
+          entity: {
+            id: "pay_test_valid_123",
+            order_id: "order_test_valid_123",
+          },
+        },
+      },
+    });
+
+    const validSignature = crypto
+      .createHmac("sha256", webhookSecret)
+      .update(payload)
+      .digest("hex");
+
+    const res = await fetch(`${baseUrl}/payment/webhook`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-razorpay-signature": validSignature,
+      },
+      body: payload,
+    });
+
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, true);
+    assert.strictEqual(data.message, "Webhook processed.");
+  });
 });

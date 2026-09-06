@@ -81,13 +81,13 @@ export const register = async (req, res) => {
 
   // Send email verification on registration
   try {
-    const token = crypto.randomBytes(32).toString("hex");
-    user.emailVerificationToken = token;
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    user.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
     user.emailVerificationExpires = Date.now() + 24 * 3600000; // 24 hours
     await user.save();
 
     const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-    const verifyUrl = `${clientUrl}/verify-email?token=${token}`;
+    const verifyUrl = `${clientUrl}/verify-email?token=${rawToken}`;
 
     await sendEmail({
       to: user.email,
@@ -159,13 +159,13 @@ export const googleLogin = async (req, res) => {
       const errText = await response.text();
       return res.status(400).json(new ApiResponse(false, `Failed to verify Google token: ${errText}`));
     }
-    const payload = await response.json();
-
-    if (process.env.GOOGLE_CLIENT_ID && payload.aud !== process.env.GOOGLE_CLIENT_ID) {
-      return res.status(400).json(new ApiResponse(false, "Token audience mismatch."));
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      return res.status(500).json(new ApiResponse(false, "Google OAuth is not configured on the server."));
     }
 
-    console.log("Google Auth Payload received:", payload);
+    if (payload.aud !== process.env.GOOGLE_CLIENT_ID) {
+      return res.status(400).json(new ApiResponse(false, "Token audience mismatch."));
+    }
 
     const email = (payload.email || "").trim().toLowerCase();
     if (!email) {
@@ -179,8 +179,6 @@ export const googleLogin = async (req, res) => {
 
     const googleId = payload.sub;
     const avatarUrl = payload.picture;
-
-    console.log("Extracted Auth Details -> Name:", name, "Email:", email, "Google ID:", googleId);
 
     let user = await User.findOne({ email });
 
@@ -294,13 +292,13 @@ export const forgotPassword = async (req, res) => {
   if (!user) {
     return res.json(new ApiResponse(true, "If that email exists in our records, a reset link has been sent."));
   }
-  const token = crypto.randomBytes(32).toString("hex");
-  user.passwordResetToken = token;
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  user.passwordResetToken = crypto.createHash("sha256").update(rawToken).digest("hex");
   user.passwordResetExpires = Date.now() + 3600000; // 1 hour
   await user.save();
 
   const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-  const resetUrl = `${clientUrl}/reset-password?token=${token}`;
+  const resetUrl = `${clientUrl}/reset-password?token=${rawToken}`;
 
   try {
     await sendEmail({
@@ -337,8 +335,9 @@ export const resetPassword = async (req, res) => {
   if (password.length < 8) {
     return res.status(400).json(new ApiResponse(false, "Password must be at least 8 characters."));
   }
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
   const user = await User.findOne({
-    passwordResetToken: token,
+    passwordResetToken: hashedToken,
     passwordResetExpires: { $gt: Date.now() },
   });
   if (!user) {
@@ -392,13 +391,13 @@ export const sendEmailVerification = async (req, res) => {
     return res.status(400).json(new ApiResponse(false, "Email is already verified."));
   }
 
-  const token = crypto.randomBytes(32).toString("hex");
-  user.emailVerificationToken = token;
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  user.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
   user.emailVerificationExpires = Date.now() + 24 * 3600000; // 24 hours
   await user.save();
 
   const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-  const verifyUrl = `${clientUrl}/verify-email?token=${token}`;
+  const verifyUrl = `${clientUrl}/verify-email?token=${rawToken}`;
 
   try {
     await sendEmail({
@@ -433,8 +432,9 @@ export const verifyEmail = async (req, res) => {
     return res.status(400).json(new ApiResponse(false, "Token is required."));
   }
 
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
   const user = await User.findOne({
-    emailVerificationToken: token,
+    emailVerificationToken: hashedToken,
     emailVerificationExpires: { $gt: Date.now() },
   });
 
@@ -457,9 +457,9 @@ export const deleteAccount = async (req, res) => {
   }
 
   user.isActive = false;
-  user.isBanned = true;
   await user.save();
 
+  res.clearCookie("token", COOKIE_OPTIONS);
   return res.json(new ApiResponse(true, "Your account has been deactivated successfully."));
 };
 

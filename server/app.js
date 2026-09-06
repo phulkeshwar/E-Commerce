@@ -62,8 +62,14 @@ app.use(
 );
 app.use(helmet());
 app.use(cookieParser());
-app.use(pinoHttp({ enabled: process.env.NODE_ENV !== "test" }));
-app.use(express.json({ limit: "2mb" }));
+app.use(
+  express.json({
+    limit: "2mb",
+    verify: (req, _res, buf) => {
+      req.rawBody = buf;
+    },
+  }),
+);
 app.use(apiRateLimiter);
 
 app.get("/api/health", (_req, res) => {

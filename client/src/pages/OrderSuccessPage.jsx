@@ -229,6 +229,11 @@ export function OrderSuccessPage() {
 
   // Check if order was just placed in this flow session
   const justPlaced = location.state?.justPlaced || false;
+  const guestTokenFromState = location.state?.guestAccessToken;
+  const guestToken =
+    guestTokenFromState ||
+    sessionStorage.getItem(`garambazaar_guest_token_${orderId}`) ||
+    localStorage.getItem(`garambazaar_guest_token_${orderId}`);
 
   useDocumentMetadata({
     title: "Order Success",
@@ -237,7 +242,7 @@ export function OrderSuccessPage() {
   });
 
   useEffect(() => {
-    getOrderByIdRequest(orderId)
+    getOrderByIdRequest(orderId, guestToken)
       .then((data) => {
         if (data && data.order) {
           setOrder(data.order);
@@ -249,7 +254,7 @@ export function OrderSuccessPage() {
       .finally(() => {
         setLoading(false);
       });
-  }, [orderId]);
+  }, [orderId, guestToken]);
 
   useEffect(() => {
     if (order && !downloaded && justPlaced) {

@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import mongoose from "mongoose";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Cart } from "../models/Cart.model.js";
@@ -198,6 +199,8 @@ export const createOrder = async (req, res) => {
     }
   }
 
+  const guestAccessToken = !req.user ? crypto.randomBytes(32).toString("hex") : undefined;
+
   // Database Transaction Wrapper with Standalone Fallback
   const session = await mongoose.startSession();
   let order;
@@ -210,6 +213,7 @@ export const createOrder = async (req, res) => {
           {
             orderNumber,
             userId: req.user?._id || undefined,
+            guestAccessToken,
             items: orderItems.map(({ product, quantity, variantName, price }) => ({
               productId: product._id,
               name: product.name,
@@ -304,6 +308,7 @@ export const createOrder = async (req, res) => {
       order = await Order.create({
         orderNumber,
         userId: req.user?._id || undefined,
+        guestAccessToken,
         items: orderItems.map(({ product, quantity, variantName, price }) => ({
           productId: product._id,
           name: product.name,
@@ -534,31 +539,39 @@ export const createOrder = async (req, res) => {
     }
   }
 
-  res.status(201).json(new ApiResponse(true, "Order placed.", { order: order.toClient() }));
+  res.status(201).json(new ApiResponse(true, "Order placed.", {
+    order: order.toClient(),
+    ...(guestAccessToken ? { guestAccessToken } : {}),
+  }));
 };
 
 export const cancelOrder = async (req, res) => {
   const { id } = req.params;
-  const order = await Order.findOne({ orderNumber: id });
+  const order = await Order.findOne({ orderNumber: id }).select("+guestAccessToken");
 
   if (!order) {
     return res.status(404).json(new ApiResponse(false, "Order not found."));
   }
 
-  let isOwner = false;
-  let isAdmin = false;
-  if (!order.userId) {
-    isOwner = true;
-  } else {
-    if (!req.user) {
-      return res.status(401).json(new ApiResponse(false, "Authentication required."));
+  let isAuthorized = false;
+  const isAdmin = req.user?.role === "admin";
+
+  if (isAdmin) {
+    isAuthorized = true;
+  } else if (order.userId) {
+    if (req.user && order.userId.toString() === req.user._id.toString()) {
+      isAuthorized = true;
     }
-    isOwner = order.userId.toString() === req.user._id.toString();
-    isAdmin = req.user.role === "admin";
+  } else {
+    // Guest order: strictly require matching guest access token
+    const providedToken = req.headers["x-guest-token"] || req.query.guestToken || req.body?.guestToken;
+    if (providedToken && order.guestAccessToken && providedToken === order.guestAccessToken) {
+      isAuthorized = true;
+    }
   }
 
-  if (!isOwner && !isAdmin) {
-    return res.status(403).json(new ApiResponse(false, "Unauthorized to cancel this order."));
+  if (!isAuthorized) {
+    return res.status(403).json(new ApiResponse(false, "Unauthorized to cancel this order. Valid authorization or guest access token required."));
   }
 
   if (order.status !== "Processing") {
@@ -613,32 +626,35 @@ export const cancelOrder = async (req, res) => {
 export const getOrderById = async (req, res) => {
   const { id } = req.params;
   const lookup = id.match(/^[a-f\d]{24}$/i) ? { $or: [{ _id: id }, { orderNumber: id }] } : { orderNumber: id };
-  const order = await Order.findOne(lookup);
+  const order = await Order.findOne(lookup).select("+guestAccessToken");
 
   if (!order) {
     return res.status(404).json(new ApiResponse(false, "Order not found."));
   }
 
-  if (!order.userId) {
-    return res.json(new ApiResponse(true, "Order fetched successfully.", { order: order.toClient() }));
+  let isAuthorized = false;
+  const isAdmin = req.user?.role === "admin";
+
+  if (isAdmin) {
+    isAuthorized = true;
+  } else if (order.userId) {
+    if (req.user && order.userId.toString() === req.user._id.toString()) {
+      isAuthorized = true;
+    } else if (req.user?.role === "seller") {
+      const products = await Product.find({ seller: req.user._id });
+      const productIds = products.map((p) => p._id.toString());
+      isAuthorized = order.items.some((item) => productIds.includes(item.productId.toString()));
+    }
+  } else {
+    // Guest order: strictly require matching guest access token
+    const providedToken = req.headers["x-guest-token"] || req.query.guestToken || req.body?.guestToken;
+    if (providedToken && order.guestAccessToken && providedToken === order.guestAccessToken) {
+      isAuthorized = true;
+    }
   }
 
-  if (!req.user) {
-    return res.status(401).json(new ApiResponse(false, "Authentication required."));
-  }
-
-  const isOwner = order.userId && order.userId.toString() === req.user._id.toString();
-  const isAdmin = req.user.role === "admin";
-  let isSellerForOrder = false;
-
-  if (req.user.role === "seller") {
-    const products = await Product.find({ seller: req.user._id });
-    const productIds = products.map((p) => p._id.toString());
-    isSellerForOrder = order.items.some((item) => productIds.includes(item.productId.toString()));
-  }
-
-  if (!isOwner && !isAdmin && !isSellerForOrder) {
-    return res.status(403).json(new ApiResponse(false, "Unauthorized to view this order."));
+  if (!isAuthorized) {
+    return res.status(403).json(new ApiResponse(false, "Unauthorized to view this order. Valid authorization or guest access token required."));
   }
 
   return res.json(new ApiResponse(true, "Order fetched successfully.", { order: order.toClient() }));

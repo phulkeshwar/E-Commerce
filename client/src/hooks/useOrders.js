@@ -36,11 +36,23 @@ export function useOrders(token) {
   const placeOrder = async (payload) => {
     const data = await createOrderRequest(payload);
     setOrders((current) => [data.order, ...current]);
-    return data.order;
+    if (data.guestAccessToken) {
+      try {
+        sessionStorage.setItem(`garambazaar_guest_token_${data.order.id}`, data.guestAccessToken);
+        localStorage.setItem(`garambazaar_guest_token_${data.order.id}`, data.guestAccessToken);
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+    return { ...data.order, guestAccessToken: data.guestAccessToken };
   };
 
-  const cancelOrder = async (orderId) => {
-    const data = await cancelOrderRequest(orderId);
+  const cancelOrder = async (orderId, guestToken) => {
+    const tokenToUse =
+      guestToken ||
+      sessionStorage.getItem(`garambazaar_guest_token_${orderId}`) ||
+      localStorage.getItem(`garambazaar_guest_token_${orderId}`);
+    const data = await cancelOrderRequest(orderId, tokenToUse);
     setOrders((current) =>
       current.map((o) => (o.id === orderId ? data.order : o))
     );
