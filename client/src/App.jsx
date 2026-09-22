@@ -42,6 +42,7 @@ const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage").then(m => (
 const ContactPage = lazy(() => import("./pages/ContactPage").then(m => ({ default: m.ContactPage })));
 const StaticContentPage = lazy(() => import("./pages/StaticContentPage").then(m => ({ default: m.StaticContentPage })));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage").then(m => ({ default: m.UnsubscribePage })));
+const SavedAddressesPage = lazy(() => import("./pages/SavedAddressesPage").then(m => ({ default: m.SavedAddressesPage })));
 
 function ScrollToTop() {
 
@@ -268,6 +269,8 @@ export default function App() {
                   <Route path="/vs-competitors" element={<VSCompetitorsPage />} />
                   <Route path="/info/:slug" element={<StaticContentPage />} />
                   <Route path="/unsubscribe" element={<UnsubscribePage />} />
+                  <Route path="/saved-addresses" element={<SavedAddressesPage />} />
+                  <Route path="/addresses" element={<SavedAddressesPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </Suspense>

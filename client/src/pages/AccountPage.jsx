@@ -357,7 +357,7 @@ export function AccountPage() {
               <Link className="acct-link" to="/wishlist">
                 <span className="al-icon">❤️</span>My Wishlist<span className="al-arrow">›</span>
               </Link>
-              <Link className="acct-link" to="/checkout">
+              <Link className="acct-link" to="/saved-addresses">
                 <span className="al-icon">📍</span>Saved Addresses<span className="al-arrow">›</span>
               </Link>
               <button className="acct-link signout-link border-0 w-full text-left bg-transparent cursor-pointer" onClick={logout}>

@@ -103,6 +103,7 @@ export function CheckoutPage() {
   });
 
   const [savedAddresses, setSavedAddresses] = useState([]);
+  const [showAddressModal, setShowAddressModal] = useState(false);
   const [settings, setSettings] = useState({
     shippingFee: 49,
     shippingFreeThreshold: 500,
@@ -142,8 +143,9 @@ export function CheckoutPage() {
       }
 
       try {
-        const serverAddrs = await getAddressesRequest();
-        if (serverAddrs && Array.isArray(serverAddrs)) {
+        const res = await getAddressesRequest();
+        const serverAddrs = res?.savedAddresses || (Array.isArray(res) ? res : []);
+        if (Array.isArray(serverAddrs)) {
           serverAddrs.forEach((addr) => {
             list.push({
               id: addr._id || addr.id,
@@ -167,16 +169,35 @@ export function CheckoutPage() {
     loadSavedAddresses();
   }, [user]);
 
+  // Pre-populate if routed from Saved Addresses page with a preselected address
+  useEffect(() => {
+    if (location.state?.selectedAddress) {
+      const addr = location.state.selectedAddress;
+      setForm((prev) => ({
+        ...prev,
+        name: addr.name || prev.name,
+        phone: addr.phone || prev.phone,
+        line1: addr.line1 || prev.line1,
+        city: addr.city || prev.city,
+        state: addr.state || prev.state,
+        pincode: addr.pincode || prev.pincode,
+      }));
+      notify(`📍 Loaded selected address: ${addr.label || "Saved Address"}`);
+    }
+  }, [location.state, notify]);
+
   const handleSelectSavedAddress = (addr) => {
     if (!addr) return;
-    setForm({
-      name: addr.name || "",
-      phone: addr.phone || "",
+    setForm((prev) => ({
+      ...prev,
+      name: addr.name || prev.name,
+      phone: addr.phone || prev.phone,
       line1: addr.line1 || "",
       city: addr.city || "",
       state: addr.state || "",
       pincode: addr.pincode || "",
-    });
+    }));
+    setShowAddressModal(false);
     notify(`📍 Loaded: ${addr.label}`);
   };
 
@@ -643,7 +664,7 @@ export function CheckoutPage() {
                 <Input label="City" value={form.city} onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))} required />
                 <Input label="State" value={form.state} onChange={(event) => setForm((current) => ({ ...current, state: event.target.value }))} required />
               </div>
-              <div className="flex items-center gap-2 mb-4 mt-3 select-none">
+              <div className="flex items-center gap-2 mb-3 mt-3 select-none">
                 <input
                   type="checkbox"
                   id="saveAddressCheck"
@@ -654,6 +675,31 @@ export function CheckoutPage() {
                 <label htmlFor="saveAddressCheck" className="text-xs font-semibold text-gray-700 cursor-pointer">
                   💾 Save this address and phone number for future use
                 </label>
+              </div>
+
+              {/* Option of Your Saved Address button directly below future address checkbox */}
+              <div className="mb-5 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  id="yourSavedAddressesBtn"
+                  onClick={() => setShowAddressModal(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#c4622d]/40 bg-[#fdfbf7] hover:bg-[#faefe2] text-[#c4622d] font-bold text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer active:scale-[0.98]"
+                >
+                  <span className="text-sm">📍</span>
+                  <span>Your Saved Addresses</span>
+                  {savedAddresses.length > 0 && (
+                    <span className="bg-[#c4622d] text-white text-[10px] px-2 py-0.5 rounded-full font-black">
+                      {savedAddresses.length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/saved-addresses")}
+                  className="text-[11px] font-semibold text-gray-500 hover:text-[#c4622d] transition-colors underline cursor-pointer bg-transparent border-0"
+                >
+                  Manage / Edit Addresses ↗
+                </button>
               </div>
 
               {/* Order Notes & Special Instructions */}
@@ -1057,6 +1103,78 @@ export function CheckoutPage() {
                 Proceed as Guest →
               </button>
             </div>
+          </div>
+        </Modal>
+      )}
+
+      {showAddressModal && (
+        <Modal title="📍 Your Saved Addresses" onClose={() => setShowAddressModal(false)}>
+          <div className="space-y-4 text-left">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-150">
+              <p className="text-xs text-gray-500">
+                Select an address to autofill your delivery details:
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddressModal(false);
+                  navigate("/saved-addresses");
+                }}
+                className="text-xs font-bold text-[#c4622d] hover:underline whitespace-nowrap ml-2 bg-transparent border-0 cursor-pointer"
+              >
+                Manage & Edit ↗
+              </button>
+            </div>
+
+            {savedAddresses.length === 0 ? (
+              <div className="text-center py-8 px-4 bg-gray-50 rounded-2xl border border-gray-150">
+                <span className="text-3xl block mb-2">📍</span>
+                <p className="text-xs font-bold text-gray-800 mb-1">No saved addresses found</p>
+                <p className="text-[11px] text-gray-500 mb-4">
+                  Add addresses in your account or save this delivery address for future orders!
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddressModal(false);
+                    navigate("/saved-addresses");
+                  }}
+                  className="bg-[#c4622d] hover:bg-[#a95223] text-white font-bold text-xs py-2 px-4 rounded-xl shadow-xs cursor-pointer border-0"
+                >
+                  ➕ Add New Address
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                {savedAddresses.map((addr) => (
+                  <div
+                    key={addr.id}
+                    className="p-3.5 rounded-2xl border border-gray-200 hover:border-[#c4622d] bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs hover:shadow-xs"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-[#fdf2e9] text-[#c4622d] border border-[#fbd0b4]">
+                          {addr.label || "Saved Address"}
+                        </span>
+                        <h4 className="text-xs font-bold text-gray-900 truncate">{addr.name}</h4>
+                      </div>
+                      <p className="text-xs text-gray-600 truncate">{addr.line1}</p>
+                      <p className="text-[11px] text-gray-500">
+                        {addr.city}, {addr.state} - <span className="font-semibold text-gray-800">{addr.pincode}</span>
+                        {addr.phone && <span className="ml-2 font-mono">· 📞 {addr.phone}</span>}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectSavedAddress(addr)}
+                      className="shrink-0 bg-[#c4622d] hover:bg-[#a95223] text-white font-bold text-xs py-2 px-4 rounded-xl shadow-2xs transition-all cursor-pointer border-0 active:scale-95"
+                    >
+                      Deliver Here ✓
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </Modal>
       )}
