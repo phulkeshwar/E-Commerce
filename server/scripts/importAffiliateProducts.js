@@ -8,10 +8,7 @@ import { Product } from "../models/Product.model.js";
 // Load environment variables with override enabled
 dotenv.config({ override: true });
 
-let MONGO_URI = process.env.MONGODB_URI;
-if (MONGO_URI && MONGO_URI.includes("callus.wdcsjbc.mongodb.net")) {
-  MONGO_URI = "mongodb+srv://pkmahto009_db_user:a7HqMp0qHc8HA81e@callus.wdcsjbc.mongodb.net/";
-}
+const MONGO_URI = process.env.MONGODB_URI;
 if (!MONGO_URI) {
   console.error("Error: MONGODB_URI is not set in environment.");
   process.exit(1);
