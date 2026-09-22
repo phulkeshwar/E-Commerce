@@ -35,6 +35,7 @@ for (const user of users) {
         passwordHash: await bcrypt.hash(user.password, Number(process.env.BCRYPT_SALT_ROUNDS || 12)),
         role: user.role,
         membership: user.membership,
+        isVerified: user.role === "admin",
       },
     },
     { upsert: true, new: true },

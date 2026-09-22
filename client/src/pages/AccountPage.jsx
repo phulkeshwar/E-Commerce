@@ -196,8 +196,8 @@ export function AccountPage() {
       <div className="account-page">
         <h2 className="account-title">👤 My Account</h2>
 
-        {/* Verification Alert Banner */}
-        {!user.isVerified && (
+        {/* Verification Alert Banner (Admins are verified by credentials) */}
+        {!user.isVerified && user.role !== "admin" && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
             <div className="flex items-center gap-3">
               <span className="text-2xl shrink-0">📧</span>

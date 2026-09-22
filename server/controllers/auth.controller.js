@@ -76,37 +76,40 @@ export const register = async (req, res) => {
       referralCode,
       referredBy,
       phone: req.body.phone ? req.body.phone.trim() : "",
+      isVerified: role === "admin",
     });
   }
 
-  // Send email verification on registration
-  try {
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    user.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
-    user.emailVerificationExpires = Date.now() + 24 * 3600000; // 24 hours
-    await user.save();
+  // Send email verification on registration (admin accounts are inherently verified)
+  if (role !== "admin") {
+    try {
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      user.emailVerificationToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+      user.emailVerificationExpires = Date.now() + 24 * 3600000; // 24 hours
+      await user.save();
 
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-    const verifyUrl = `${clientUrl}/verify-email?token=${rawToken}`;
+      const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+      const verifyUrl = `${clientUrl}/verify-email?token=${rawToken}`;
 
-    await sendEmail({
-      to: user.email,
-      subject: "Welcome to GaramBazaar! Verify Your Email Address",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
-          <h2 style="color: #ea580c; border-bottom: 2px solid #f97316; padding-bottom: 10px;">Verify Your Email Address</h2>
-          <p style="font-size: 16px; color: #333;">Hello ${user.name || "User"},</p>
-          <p style="font-size: 16px; color: #333;">Welcome to GaramBazaar! Please click the button below to verify your email address:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${verifyUrl}" style="background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Verify Email</a>
+      await sendEmail({
+        to: user.email,
+        subject: "Welcome to GaramBazaar! Verify Your Email Address",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+            <h2 style="color: #ea580c; border-bottom: 2px solid #f97316; padding-bottom: 10px;">Verify Your Email Address</h2>
+            <p style="font-size: 16px; color: #333;">Hello ${user.name || "User"},</p>
+            <p style="font-size: 16px; color: #333;">Welcome to GaramBazaar! Please click the button below to verify your email address:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${verifyUrl}" style="background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Verify Email</a>
+            </div>
+            <p style="font-size: 14px; color: #666;">This link is valid for 24 hours.</p>
           </div>
-          <p style="font-size: 14px; color: #666;">This link is valid for 24 hours.</p>
-        </div>
-      `,
-      text: `Hello ${user.name || "User"}, welcome to GaramBazaar! Verify your email using this link: ${verifyUrl}`,
-    });
-  } catch (emailErr) {
-    console.error("Failed to send welcome verification email during registration:", emailErr.message);
+        `,
+        text: `Hello ${user.name || "User"}, welcome to GaramBazaar! Verify your email using this link: ${verifyUrl}`,
+      });
+    } catch (emailErr) {
+      console.error("Failed to send welcome verification email during registration:", emailErr.message);
+    }
   }
 
   const token = generateToken(user);
@@ -129,6 +132,12 @@ export const login = async (req, res) => {
 
   if (user.isActive === false) {
     return res.status(403).json(new ApiResponse(false, "This account has been deactivated. Please contact support."));
+  }
+
+  // Admin users are inherently verified by their valid credentials
+  if (user.role === "admin" && !user.isVerified) {
+    user.isVerified = true;
+    await user.save();
   }
 
   const token = generateToken(user);
@@ -387,8 +396,8 @@ export const sendEmailVerification = async (req, res) => {
   if (!user) {
     return res.status(404).json(new ApiResponse(false, "User not found."));
   }
-  if (user.isVerified) {
-    return res.status(400).json(new ApiResponse(false, "Email is already verified."));
+  if (user.role === "admin" || user.isVerified) {
+    return res.status(400).json(new ApiResponse(false, "Admin accounts and verified emails do not require email verification."));
   }
 
   const rawToken = crypto.randomBytes(32).toString("hex");

@@ -44,6 +44,13 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+userSchema.pre("save", function (next) {
+  if (this.role === "admin") {
+    this.isVerified = true;
+  }
+  next();
+});
+
 userSchema.methods.toClient = function toClient() {
   return {
     id: this._id.toString(),
@@ -56,7 +63,7 @@ userSchema.methods.toClient = function toClient() {
     creditScore: this.creditScore ?? 750,
     phone: this.phone || "",
     address: this.address || { line1: "", city: "", state: "", pincode: "" },
-    isVerified: this.isVerified,
+    isVerified: this.role === "admin" ? true : Boolean(this.isVerified),
     isGuest: this.isGuest,
     isActive: this.isActive,
     loyaltyPoints: this.loyaltyPoints || 0,
