@@ -12,7 +12,7 @@ export function ChatbotWidget() {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
-      text: "👋 Namaste! I am GaramAssistant, your personal AI shopping helper. How can I assist you today? You can search for products, ask for support, or tell me to buy something directly!"
+      text: "👋 Namaste! I am GaramAssistant, your AI store concierge and shopping helper.\n\nAsk me about **delivery timelines**, **shipping charges**, **helpline support**, **7-day returns**, or search for **top-rated organic products**!"
     }
   ]);
   const [input, setInput] = useState("");
@@ -97,59 +97,78 @@ export function ChatbotWidget() {
     }
   };
 
-  // Helper to parse markdown links within chat messages
+  // Helper to parse markdown links and bold formatting within chat messages
   const parseMessageText = (text) => {
-    const regex = /\[([^\]]+)\]\(([^)]+)\)/g;
-    const parts = [];
-    let lastIndex = 0;
+    if (!text) return "";
+    
+    // First, split by markdown links [label](url)
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const segments = [];
+    let lastIdx = 0;
     let match;
 
-    while ((match = regex.exec(text)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push(text.substring(lastIndex, match.index));
+    while ((match = linkRegex.exec(text)) !== null) {
+      if (match.index > lastIdx) {
+        segments.push({ type: "text", value: text.substring(lastIdx, match.index) });
       }
-      const label = match[1];
-      const url = match[2];
+      segments.push({ type: "link", label: match[1], url: match[2], key: match.index });
+      lastIdx = linkRegex.lastIndex;
+    }
 
-      if (url.startsWith("/")) {
-        parts.push(
-          <Link
-            key={match.index}
-            to={url}
-            onClick={() => setIsOpen(false)}
-            className="text-[#ea580c] font-bold hover:underline"
-          >
-            {label}
-          </Link>
-        );
-      } else {
-        parts.push(
+    if (lastIdx < text.length) {
+      segments.push({ type: "text", value: text.substring(lastIdx) });
+    }
+
+    // Helper to render bold markdown **text**
+    const renderWithBold = (str, baseKey) => {
+      const parts = str.split(/(\*\*[^*]+\*\*)/g);
+      return parts.map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return (
+            <strong key={`${baseKey}-${i}`} className="font-bold text-gray-900">
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+        return part;
+      });
+    };
+
+    return segments.map((seg, idx) => {
+      if (seg.type === "link") {
+        if (seg.url.startsWith("/")) {
+          return (
+            <Link
+              key={seg.key || idx}
+              to={seg.url}
+              onClick={() => setIsOpen(false)}
+              className="text-[#c4622d] font-bold underline hover:text-[#ea580c] transition-colors"
+            >
+              {seg.label}
+            </Link>
+          );
+        }
+        return (
           <a
-            key={match.index}
-            href={url}
+            key={seg.key || idx}
+            href={seg.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#ea580c] font-bold hover:underline"
+            className="text-[#c4622d] font-bold underline hover:text-[#ea580c] transition-colors"
           >
-            {label}
+            {seg.label}
           </a>
         );
       }
-      lastIndex = regex.lastIndex;
-    }
-
-    if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex));
-    }
-
-    return parts.length > 0 ? parts : text;
+      return <span key={idx}>{renderWithBold(seg.value, idx)}</span>;
+    });
   };
 
   const quickPills = [
-    { label: "🍎 Show Fruits", text: "Show me some organic fresh fruits" },
-    { label: "🛒 Checkout Cart", text: "I want to checkout my cart items" },
-    { label: "📦 Track Orders", text: "Where can I view my order status?" },
-    { label: "📞 Support", text: "How can I contact customer support?" }
+    { label: "🚚 Delivery & Timelines", text: "What are your delivery charges and how long does shipping take to Ranchi or Metros?" },
+    { label: "📞 Helpline & Support", text: "What is your customer care email and helpline support desk?" },
+    { label: "⭐ Top Rated Items", text: "Can you show me your top rated products with their ratings and price?" },
+    { label: "↩️ 7-Day Returns", text: "What is your return and refund policy if food or oil arrives damaged?" }
   ];
 
   return (
@@ -300,7 +319,7 @@ export function ChatbotWidget() {
             >
               <input
                 type="text"
-                placeholder={isAuthenticated ? "Type message..." : "Log in to chat or shop..."}
+                placeholder="Ask about products, delivery, helpline..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-[#c4622d] focus:bg-white transition-all text-gray-800 placeholder-gray-400"

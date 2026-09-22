@@ -1,8 +1,10 @@
 import { Product } from "../models/Product.model.js";
 import { Order } from "../models/Order.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { getFormattedRAGContext } from "../services/ragService.js";
+import { getCache, setCache } from "../utils/cache.js";
 
-// Helper to search products in Mongoose
+// Helper to search products in Mongoose with live rating, reviews, stock, and price
 const searchProductsTool = async (query) => {
   try {
     if (!query || typeof query !== "string") {
@@ -10,16 +12,30 @@ const searchProductsTool = async (query) => {
     }
 
     const cleanQuery = query.trim();
-    // Try text index search first
-    let products = await Product.find(
-      { $text: { $search: cleanQuery }, isPublished: true },
-      { score: { $meta: "textScore" } }
-    )
-    .sort({ score: { $meta: "textScore" } })
-    .limit(5)
-    .lean();
+    const isRatingQuery = /top|best|high|rating|rated|popular|review/i.test(cleanQuery);
 
-    // Fallback to regex search if no results found
+    let products = [];
+
+    // If looking for top/best rated, prioritize rating sort
+    if (isRatingQuery) {
+      products = await Product.find({ isPublished: true })
+        .sort({ rating: -1, reviewsCount: -1 })
+        .limit(5)
+        .lean();
+    }
+
+    // Try text index search
+    if (products.length === 0) {
+      products = await Product.find(
+        { $text: { $search: cleanQuery }, isPublished: true },
+        { score: { $meta: "textScore" } }
+      )
+        .sort({ score: { $meta: "textScore" } })
+        .limit(5)
+        .lean();
+    }
+
+    // Fallback to regex search across name, category, and description
     if (products.length === 0) {
       products = await Product.find({
         $or: [
@@ -29,23 +45,75 @@ const searchProductsTool = async (query) => {
         ],
         isPublished: true
       })
-      .limit(5)
-      .lean();
+        .sort({ rating: -1 })
+        .limit(5)
+        .lean();
     }
 
-    return products.map((p) => ({
-      id: p._id.toString(),
-      name: p.name,
-      price: p.price,
-      emoji: p.emoji || "📦",
-      category: p.category,
-      inStock: p.inStock,
-      stockCount: p.stockCount,
-      variants: (p.variants || []).map(v => ({ name: v.name, price: v.price }))
-    }));
+    return products.map((p) => {
+      const discount =
+        p.originalPrice && p.originalPrice > p.price
+          ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
+          : 0;
+
+      return {
+        id: p._id.toString(),
+        name: p.name,
+        price: p.price,
+        originalPrice: p.originalPrice || null,
+        discountPercent: discount > 0 ? `${discount}% OFF` : null,
+        rating: p.rating ? Number(p.rating.toFixed(1)) : 0,
+        reviewsCount: p.reviewsCount || 0,
+        emoji: p.emoji || "📦",
+        category: p.category,
+        inStock: p.inStock,
+        stockCount: p.stockCount,
+        link: `/products/${p._id.toString()}`,
+        variants: (p.variants || []).map((v) => ({
+          name: v.name,
+          price: v.price,
+          stockCount: v.stockCount
+        }))
+      };
+    });
   } catch (err) {
     console.error("searchProductsTool error:", err);
     return [];
+  }
+};
+
+// Helper to look up an order status
+const trackOrderTool = async (userId, orderNumber) => {
+  try {
+    const query = {};
+    if (orderNumber) {
+      query.orderNumber = orderNumber.trim().toUpperCase();
+    } else if (userId) {
+      // Find latest order for the user
+      query.userId = userId;
+    } else {
+      return { error: "Please provide an order number (e.g. ORD-XXXXXX-XXX) or log in to view your orders." };
+    }
+
+    const order = await Order.findOne(query).sort({ createdAt: -1 }).lean();
+    if (!order) {
+      return { found: false, message: `No order found matching "${orderNumber || "recent account history"}".` };
+    }
+
+    return {
+      found: true,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      total: order.total,
+      itemCount: order.items?.length || 0,
+      items: (order.items || []).map((item) => `${item.name} (x${item.quantity})`).join(", "),
+      createdAt: order.createdAt,
+      shippingCity: order.shippingAddress?.city,
+      latestNote: order.statusHistory?.[order.statusHistory.length - 1]?.note || "In transit"
+    };
+  } catch (err) {
+    console.error("trackOrderTool error:", err);
+    return { error: err.message };
   }
 };
 
@@ -76,7 +144,7 @@ const createDirectOrderTool = async (userId, args) => {
     // Resolve price
     let price = product.price;
     if (variantName) {
-      const variant = product.variants.find(v => v.name === variantName);
+      const variant = product.variants.find((v) => v.name === variantName);
       if (!variant || variant.stockCount < quantity) {
         return { error: `Variant "${variantName}" is out of stock or unavailable.` };
       }
@@ -92,16 +160,18 @@ const createDirectOrderTool = async (userId, args) => {
     const order = await Order.create({
       orderNumber,
       userId,
-      items: [{
-        productId: product._id,
-        name: product.name,
-        price,
-        quantity,
-        emoji: product.emoji || "📦",
-        image: product.images?.[0]?.url || "",
-        variantName,
-        fulfillmentStatus: "Processing"
-      }],
+      items: [
+        {
+          productId: product._id,
+          name: product.name,
+          price,
+          quantity,
+          emoji: product.emoji || "📦",
+          image: product.images?.[0]?.url || "",
+          variantName,
+          fulfillmentStatus: "Processing"
+        }
+      ],
       shippingAddress: {
         name: shippingName,
         phone: shippingPhone,
@@ -111,14 +181,14 @@ const createDirectOrderTool = async (userId, args) => {
         pincode: shippingPincode
       },
       payment: {
-        method: "card", // Default to card to redirect directly to online payment options
+        method: "card",
         status: "pending"
       },
       subtotal,
       shippingFee,
       total,
       status: "Processing",
-      statusHistory: [{ status: "Processing", note: "Order placed via AI Chatbot Assistant." }]
+      statusHistory: [{ status: "Processing", note: "Order placed via GaramAssistant conversational checkout." }]
     });
 
     return {
@@ -145,7 +215,42 @@ export const handleChat = async (req, res) => {
     return res.status(500).json(new ApiResponse(false, "Gemini API is not configured on the server."));
   }
 
-  // 1. Convert client history to Gemini format
+  const cleanMessage = message.trim();
+  const normalizedKey = cleanMessage.toLowerCase().replace(/[^\w\s]/gi, "").slice(0, 100);
+
+  // 1. High-Concurrency Redis/Memory Cache Check (Only for single-turn general queries)
+  // Saves Gemini free tier API quota so 500+ users can ask common questions at 0 cost
+  const isGeneralQuery =
+    history.length === 0 &&
+    !/buy|order|purchase|checkout|my address|pin|phone/i.test(cleanMessage);
+
+  const cacheKey = `chat:rag:${normalizedKey}`;
+  if (isGeneralQuery) {
+    try {
+      const cached = await getCache(cacheKey);
+      if (cached) {
+        res.setHeader("X-Cache", "HIT");
+        return res.json(
+          new ApiResponse(true, "Chat response (cached).", {
+            message: cached.message,
+            action: null
+          })
+        );
+      }
+    } catch {
+      // Ignore cache check errors
+    }
+  }
+
+  // 2. Perform RAG retrieval over store knowledge base
+  let ragContext = "";
+  try {
+    ragContext = await getFormattedRAGContext(cleanMessage);
+  } catch (ragErr) {
+    console.warn("[RAG] Context retrieval error:", ragErr.message);
+  }
+
+  // 3. Convert client history to Gemini format
   const contents = [];
   history.forEach((msg) => {
     contents.push({
@@ -157,85 +262,135 @@ export const handleChat = async (req, res) => {
   // Append user's current message
   contents.push({
     role: "user",
-    parts: [{ text: message }]
+    parts: [{ text: cleanMessage }]
   });
 
-  // System instruction for shopping assistant
+  // 4. Enhanced System instruction for GaramAssistant
   const systemInstruction = {
-    parts: [{
-      text: `You are GaramAssistant, the premium and intelligent conversational AI Shopping Assistant for GaramBazaar (an Indian organic e-grocer).
-      
-      Your goal is to answer queries, suggest store navigation links, recommend products, and guide users to make purchases.
-      
-      When sharing pages or navigation, ALWAYS format them as markdown links:
-      - Shop Page: [Shop Now](/shop)
-      - Shopping Cart: [Cart](/cart)
-      - Check Out: [Checkout](/checkout)
-      - Track Orders: [Orders](/orders)
-      - Customer Support: [Contact Support](/contact)
-      
-      PRODUCT SEARCH:
-      If a user asks about any product, always search for it using the 'search_products' tool to get live details before answering. Present matching products with their names, prices, and links format: '[Product Name](/products/productId)'.
-      
-      PLACING A DIRECT ORDER:
-      If a user indicates they want to buy a product, follow this exact conversational flow:
-      1. Ask for variant choice (if the product has multiple variants returned by 'search_products') and quantity.
-      2. If the user is NOT logged in, remind them politely they must be logged in to complete direct orders, and provide this link: '[Log in here](/auth)'.
-      3. If they are logged in, gather their delivery info step-by-step:
-         - Recipient Full Name
-         - Contact Phone Number
-         - Shipping Address Details (Street address line 1, City, State, and a valid 6-digit Pincode)
-      4. Once you have ALL these inputs, invoke the 'create_direct_order' tool. If it succeeds, let the user know and explain they will be redirected to complete payment.
-      
-      Remember to be helpful, polite, and output clear response copy. Do not make up product IDs, always resolve them via search_products first.`
-    }]
-  };
+    parts: [
+      {
+        text: `You are GaramAssistant, the premium, intelligent AI shopping assistant and store concierge for GaramBazaar (an authentic Indian organic e-grocer and rural artisan bazaar).
 
-  // Define tools for function calling
-  const tools = [{
-    functionDeclarations: [
-      {
-        name: "search_products",
-        description: "Searches the GaramBazaar product catalogue for matching items.",
-        parameters: {
-          type: "OBJECT",
-          properties: {
-            query: {
-              type: "STRING",
-              description: "The name, type, category, or detail of the product to search (e.g. 'mango', 'dairy')"
-            }
-          },
-          required: ["query"]
-        }
-      },
-      {
-        name: "create_direct_order",
-        description: "Programmatically registers an unpaid order in the database for direct checkout.",
-        parameters: {
-          type: "OBJECT",
-          properties: {
-            productId: { type: "STRING", description: "The internal database ID of the product" },
-            quantity: { type: "NUMBER", description: "Quantity of the item (minimum 1)" },
-            variantName: { type: "STRING", description: "Optional name of the product variant (e.g. '500g')" },
-            shippingName: { type: "STRING", description: "Recipient's full name" },
-            shippingPhone: { type: "STRING", description: "Recipient's contact number" },
-            shippingLine1: { type: "STRING", description: "Street address and house details" },
-            shippingCity: { type: "STRING", description: "City" },
-            shippingState: { type: "STRING", description: "State name" },
-            shippingPincode: { type: "STRING", description: "6-digit postal code" }
-          },
-          required: ["productId", "quantity", "shippingName", "shippingPhone", "shippingLine1", "shippingCity", "shippingState", "shippingPincode"]
-        }
+Your goal is to answer shoppers' questions with precision, guide them to store pages, answer delivery and customer support questions, search products with real-time ratings, and help place direct orders.
+
+STORE KNOWLEDGE BASE CONTEXT (RAG):
+${ragContext || "No specific policy document matched. Rely on general GaramBazaar knowledge (₹49 standard shipping, FREE delivery on orders over ₹500, 7-day hassle-free returns for food/crafts, customer helpline support@garambazaar.in, Contact desk at /contact)."}
+
+KEY BEHAVIOR & GUIDELINES:
+1. DELIVERY & SHIPPING:
+   - Use the retrieved knowledge above.
+   - Timelines: Local Jharkhand/Ranchi 1–2 days; Metros (Delhi, Mumbai, Bengaluru, etc.) 3–5 days; Rest of India 5–7 days.
+   - Standard shipping is ₹49; **FREE Delivery** on orders of ₹500 or more!
+   - Eco-friendly packaging: glass jars, paper boxes, plastic-free cushioning.
+
+2. HELPLINE & CUSTOMER SERVICE:
+   - Helpline Email: support@garambazaar.in
+   - Support Desk Page: [Contact Support](/contact)
+   - Working hours: Mon–Sat 9:00 AM – 7:00 PM IST.
+   - Always encourage users to submit a ticket at [Contact Us](/contact) if they have complaints or damaged items.
+
+3. RETURNS & REFUNDS:
+   - 7-day return policy via [My Orders](/orders).
+   - Perishable/food damage does NOT require sending the food back—just submit a photo proof.
+   - UPI refunds in 24 hours; Cards/Net Banking in 3–5 banking days.
+
+4. PRODUCT SEARCH & RATINGS:
+   - When a user asks about products, ALWAYS search using the 'search_products' tool to get live database details.
+   - When presenting products, ALWAYS mention their **star rating** and **reviews count** (e.g. "⭐ 4.8/5 (24 reviews)"), current price, discount, and direct link in format: '[Product Name](/products/productId)'.
+   - If they ask for "top rated" or "best", use 'search_products' with query 'top rated'.
+
+5. ORDER TRACKING:
+   - If a user provides an order number or asks about their order status, invoke the 'track_order' tool.
+
+6. PLACING A DIRECT ORDER:
+   - If a user explicitly wants to buy an item directly from chat:
+     a. Confirm the product and variant choice (if variants exist).
+     b. If the user is NOT logged in, politely inform them they need an account: '[Log in here](/auth)'.
+     c. If logged in, gather: Full Name, Phone Number, Street Address Line 1, City, State, and 6-digit Pincode.
+     d. Once you have all 6 pieces of information, call 'create_direct_order'.
+
+NAVIGATION LINKS FORMAT:
+Always format links with clear markdown:
+- Store Shop: [Shop Now](/shop)
+- Cart: [View Cart](/cart)
+- Checkout: [Checkout](/checkout)
+- Orders: [My Orders](/orders)
+- Customer Care Desk: [Contact Helpline](/contact)
+
+Be warm, polite, crisp, and never invent fake product IDs or contradict the official store policies.`
       }
     ]
-  }];
+  };
+
+  // 5. Define tools for function calling
+  const tools = [
+    {
+      functionDeclarations: [
+        {
+          name: "search_products",
+          description: "Searches the live GaramBazaar product catalogue for matching items, including real-time ratings, reviews count, prices, discounts, and inventory stock.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              query: {
+                type: "STRING",
+                description: "The product name, category, or search phrase (e.g. 'pure ghee', 'top rated honey', 'mustard oil')"
+              }
+            },
+            required: ["query"]
+          }
+        },
+        {
+          name: "track_order",
+          description: "Checks the live status and details of a customer's order.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              orderNumber: {
+                type: "STRING",
+                description: "The order number (e.g. 'ORD-123456-789')"
+              }
+            }
+          }
+        },
+        {
+          name: "create_direct_order",
+          description: "Registers an unpaid order in the database for direct checkout through the chat assistant.",
+          parameters: {
+            type: "OBJECT",
+            properties: {
+              productId: { type: "STRING", description: "The database ID of the product" },
+              quantity: { type: "NUMBER", description: "Quantity of the item (minimum 1)" },
+              variantName: { type: "STRING", description: "Optional variant name (e.g. '500g', '1L')" },
+              shippingName: { type: "STRING", description: "Recipient's full name" },
+              shippingPhone: { type: "STRING", description: "10-digit mobile number" },
+              shippingLine1: { type: "STRING", description: "Street address and house details" },
+              shippingCity: { type: "STRING", description: "City" },
+              shippingState: { type: "STRING", description: "State" },
+              shippingPincode: { type: "STRING", description: "6-digit postal code" }
+            },
+            required: [
+              "productId",
+              "quantity",
+              "shippingName",
+              "shippingPhone",
+              "shippingLine1",
+              "shippingCity",
+              "shippingState",
+              "shippingPincode"
+            ]
+          }
+        }
+      ]
+    }
+  ];
 
   let lastAction = null;
   let iterations = 0;
-  
+
   try {
     while (iterations < 5) {
-      // Retry-aware fetch for Gemini with backoff on 429
+      // Retry-aware fetch for Gemini with exponential backoff on 429
       let geminiResponse = null;
       for (let retryAttempt = 0; retryAttempt < 3; retryAttempt++) {
         geminiResponse = await fetch(
@@ -261,7 +416,9 @@ export const handleChat = async (req, res) => {
       if (!response || !response.ok) {
         const errorText = response ? await response.text() : "No response after retries";
         console.error("Gemini API error:", errorText);
-        return res.status(502).json(new ApiResponse(false, "Error communicating with AI service. Please try again in a moment."));
+        return res
+          .status(502)
+          .json(new ApiResponse(false, "Error communicating with AI service. Please try again in a moment."));
       }
 
       const responseData = await response.json();
@@ -283,6 +440,8 @@ export const handleChat = async (req, res) => {
 
         if (name === "search_products") {
           toolResult = await searchProductsTool(args.query);
+        } else if (name === "track_order") {
+          toolResult = await trackOrderTool(req.user?._id, args.orderNumber);
         } else if (name === "create_direct_order") {
           if (!req.user) {
             toolResult = { error: "User is not authenticated. Please log in first." };
@@ -321,6 +480,12 @@ export const handleChat = async (req, res) => {
       } else {
         // Return final text answer
         const text = firstPart?.text || "Let me know how I can help you.";
+
+        // Cache general non-order answers for 1 hour
+        if (isGeneralQuery && !lastAction) {
+          setCache(cacheKey, { message: text }, 3600).catch(() => {});
+        }
+
         return res.json(
           new ApiResponse(true, "Chat updated.", {
             message: text,

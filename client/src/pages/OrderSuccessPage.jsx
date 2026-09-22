@@ -115,7 +115,7 @@ function downloadInvoicePDF(order) {
 
         <div style="border: 1px dashed #fcd34d; background-color: #fffbeb; padding: 12px; border-radius: 12px; margin-top: 25px; text-align: center;">
           <p style="margin: 0; font-weight: 800; color: #b45309; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">🔗 Live Delivery Tracking Link</p>
-          <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 9px; color: #4b5563; word-break: break-all;">${trackingLink}</p>
+          <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 9px; color: #4b5563; word-break: break-all;"><a href="${trackingLink}" style="color: #c4622d; text-decoration: underline;">${trackingLink}</a></p>
         </div>
       `;
 
