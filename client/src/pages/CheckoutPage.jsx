@@ -623,6 +623,18 @@ export function CheckoutPage() {
                   }}
                   required
                 />
+                <Input
+                  label="Phone number"
+                  type="tel"
+                  placeholder="10-digit mobile number"
+                  value={form.phone}
+                  maxLength={15}
+                  onChange={(event) => {
+                    const val = event.target.value.replace(/[^\d+\s-]/g, "").slice(0, 15);
+                    setForm((current) => ({ ...current, phone: val }));
+                  }}
+                  required
+                />
               </div>
               <div className="form-row full">
                 <Input label="Address line" value={form.line1} onChange={(event) => setForm((current) => ({ ...current, line1: event.target.value }))} required />
