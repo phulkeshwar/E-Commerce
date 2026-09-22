@@ -1,7 +1,8 @@
 import { Product } from "../models/Product.model.js";
 import { Order } from "../models/Order.model.js";
+import { ChatSession } from "../models/ChatSession.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { getFormattedRAGContext } from "../services/ragService.js";
+import { getFormattedRAGContext, learnKnowledgePair } from "../services/ragService.js";
 import { getCache, setCache } from "../utils/cache.js";
 
 // Helper to search products in Mongoose with live rating, reviews, stock, and price
@@ -89,7 +90,6 @@ const trackOrderTool = async (userId, orderNumber) => {
     if (orderNumber) {
       query.orderNumber = orderNumber.trim().toUpperCase();
     } else if (userId) {
-      // Find latest order for the user
       query.userId = userId;
     } else {
       return { error: "Please provide an order number (e.g. ORD-XXXXXX-XXX) or log in to view your orders." };
@@ -203,8 +203,11 @@ const createDirectOrderTool = async (userId, args) => {
   }
 };
 
+/**
+ * Handle incoming chat message with Vector RAG, tool calling, session persistence, and dynamic learning.
+ */
 export const handleChat = async (req, res) => {
-  const { message, history = [] } = req.body;
+  const { message, history = [], sessionId: clientSessionId } = req.body;
 
   if (!message || typeof message !== "string") {
     return res.status(400).json(new ApiResponse(false, "Message is required."));
@@ -218,8 +221,31 @@ export const handleChat = async (req, res) => {
   const cleanMessage = message.trim();
   const normalizedKey = cleanMessage.toLowerCase().replace(/[^\w\s]/gi, "").slice(0, 100);
 
-  // 1. High-Concurrency Redis/Memory Cache Check (Only for single-turn general queries)
-  // Saves Gemini free tier API quota so 500+ users can ask common questions at 0 cost
+  // 1. Session management & persistence in MongoDB
+  let chatSession = null;
+  const activeSessionId = clientSessionId || req.headers["x-session-id"] || `guest_${Date.now()}`;
+  try {
+    if (req.user) {
+      chatSession = await ChatSession.findOne({ userId: req.user._id }).sort({ updatedAt: -1 });
+    } else if (activeSessionId) {
+      chatSession = await ChatSession.findOne({ sessionId: activeSessionId });
+    }
+
+    if (!chatSession) {
+      chatSession = new ChatSession({
+        userId: req.user ? req.user._id : null,
+        sessionId: activeSessionId,
+        messages: []
+      });
+    }
+
+    chatSession.addMessage("user", cleanMessage);
+    await chatSession.save().catch(() => {});
+  } catch (sessionErr) {
+    console.warn("[Chat] Session storage error:", sessionErr.message);
+  }
+
+  // 2. High-Concurrency Redis/Memory Cache Check
   const isGeneralQuery =
     history.length === 0 &&
     !/buy|order|purchase|checkout|my address|pin|phone/i.test(cleanMessage);
@@ -230,19 +256,24 @@ export const handleChat = async (req, res) => {
       const cached = await getCache(cacheKey);
       if (cached) {
         res.setHeader("X-Cache", "HIT");
+        if (chatSession) {
+          chatSession.addMessage("bot", cached.message, null);
+          chatSession.save().catch(() => {});
+        }
         return res.json(
           new ApiResponse(true, "Chat response (cached).", {
             message: cached.message,
-            action: null
+            action: null,
+            sessionId: chatSession?.sessionId || activeSessionId
           })
         );
       }
     } catch {
-      // Ignore cache check errors
+      // Ignore cache errors
     }
   }
 
-  // 2. Perform RAG retrieval over store knowledge base
+  // 3. Perform RAG retrieval over store knowledge base (Static + Learned)
   let ragContext = "";
   try {
     ragContext = await getFormattedRAGContext(cleanMessage);
@@ -250,7 +281,7 @@ export const handleChat = async (req, res) => {
     console.warn("[RAG] Context retrieval error:", ragErr.message);
   }
 
-  // 3. Convert client history to Gemini format
+  // 4. Convert client history to Gemini format
   const contents = [];
   history.forEach((msg) => {
     contents.push({
@@ -265,7 +296,7 @@ export const handleChat = async (req, res) => {
     parts: [{ text: cleanMessage }]
   });
 
-  // 4. Enhanced System instruction for GaramAssistant
+  // 5. Enhanced System instruction for GaramAssistant
   const systemInstruction = {
     parts: [
       {
@@ -274,24 +305,23 @@ export const handleChat = async (req, res) => {
 Your goal is to answer shoppers' questions with precision, guide them to store pages, answer delivery and customer support questions, search products with real-time ratings, and help place direct orders.
 
 STORE KNOWLEDGE BASE CONTEXT (RAG):
-${ragContext || "No specific policy document matched. Rely on general GaramBazaar knowledge (₹49 standard shipping, FREE delivery on orders over ₹500, 7-day hassle-free returns for food/crafts, customer helpline support@garambazaar.in, Contact desk at /contact)."}
+${ragContext || "No specific policy document matched. Rely on general GaramBazaar knowledge (₹49 standard shipping, FREE delivery on orders over ₹500, 7-day hassle-free returns for food/crafts, customer helpline garamsoftwares@gmail.com, Contact desk at /contact)."}
 
 KEY BEHAVIOR & GUIDELINES:
 1. DELIVERY & SHIPPING:
-   - Use the retrieved knowledge above.
-   - Timelines: Local Jharkhand/Ranchi 1–2 days; Metros (Delhi, Mumbai, Bengaluru, etc.) 3–5 days; Rest of India 5–7 days.
+   - Timelines: Local Jharkhand/Ranchi 1–2 days; Metros 3–5 days; Rest of India 5–7 days.
    - Standard shipping is ₹49; **FREE Delivery** on orders of ₹500 or more!
    - Eco-friendly packaging: glass jars, paper boxes, plastic-free cushioning.
 
 2. HELPLINE & CUSTOMER SERVICE:
-   - Helpline Email: support@garambazaar.in
+   - Helpline Email: garamsoftwares@gmail.com
    - Support Desk Page: [Contact Support](/contact)
    - Working hours: Mon–Sat 9:00 AM – 7:00 PM IST.
    - Always encourage users to submit a ticket at [Contact Us](/contact) if they have complaints or damaged items.
 
 3. RETURNS & REFUNDS:
    - 7-day return policy via [My Orders](/orders).
-   - Perishable/food damage does NOT require sending the food back—just submit a photo proof.
+   - Perishable/food damage does NOT require sending the food back—just submit photo proof.
    - UPI refunds in 24 hours; Cards/Net Banking in 3–5 banking days.
 
 4. PRODUCT SEARCH & RATINGS:
@@ -304,10 +334,10 @@ KEY BEHAVIOR & GUIDELINES:
 
 6. PLACING A DIRECT ORDER:
    - If a user explicitly wants to buy an item directly from chat:
-     a. Confirm the product and variant choice (if variants exist).
-     b. If the user is NOT logged in, politely inform them they need an account: '[Log in here](/auth)'.
+     a. Confirm the product and variant choice.
+     b. If the user is NOT logged in: '[Log in here](/auth)'.
      c. If logged in, gather: Full Name, Phone Number, Street Address Line 1, City, State, and 6-digit Pincode.
-     d. Once you have all 6 pieces of information, call 'create_direct_order'.
+     d. Once you have all details, call 'create_direct_order'.
 
 NAVIGATION LINKS FORMAT:
 Always format links with clear markdown:
@@ -317,12 +347,12 @@ Always format links with clear markdown:
 - Orders: [My Orders](/orders)
 - Customer Care Desk: [Contact Helpline](/contact)
 
-Be warm, polite, crisp, and never invent fake product IDs or contradict the official store policies.`
+Be warm, polite, crisp, and never invent fake product IDs or contradict official store policies.`
       }
     ]
   };
 
-  // 5. Define tools for function calling
+  // 6. Define tools for function calling
   const tools = [
     {
       functionDeclarations: [
@@ -390,7 +420,6 @@ Be warm, polite, crisp, and never invent fake product IDs or contradict the offi
 
   try {
     while (iterations < 5) {
-      // Retry-aware fetch for Gemini with exponential backoff on 429
       let geminiResponse = null;
       for (let retryAttempt = 0; retryAttempt < 3; retryAttempt++) {
         geminiResponse = await fetch(
@@ -429,7 +458,6 @@ Be warm, polite, crisp, and never invent fake product IDs or contradict the offi
         return res.status(500).json(new ApiResponse(false, "Unable to generate response."));
       }
 
-      // Add Model's response to contents context
       contents.push(botMessage);
 
       // Check if Model called a function
@@ -463,7 +491,6 @@ Be warm, polite, crisp, and never invent fake product IDs or contradict the offi
           toolResult = { error: "Unknown tool mapping." };
         }
 
-        // Push tool execution response
         contents.push({
           role: "function",
           parts: [
@@ -478,7 +505,6 @@ Be warm, polite, crisp, and never invent fake product IDs or contradict the offi
 
         iterations++;
       } else {
-        // Return final text answer
         const text = firstPart?.text || "Let me know how I can help you.";
 
         // Cache general non-order answers for 1 hour
@@ -486,10 +512,22 @@ Be warm, polite, crisp, and never invent fake product IDs or contradict the offi
           setCache(cacheKey, { message: text }, 3600).catch(() => {});
         }
 
+        // Save bot answer into persistent session
+        if (chatSession) {
+          chatSession.addMessage("bot", text, lastAction);
+          chatSession.save().catch(() => {});
+        }
+
+        // Dynamic Learning: If this is an informative answer to a novel customer question, store it in dynamic RAG knowledge!
+        if (isGeneralQuery && text.length > 50 && !text.includes("error") && !text.includes("429")) {
+          learnKnowledgePair(cleanMessage, text, "customer_interaction").catch(() => {});
+        }
+
         return res.json(
           new ApiResponse(true, "Chat updated.", {
             message: text,
-            action: lastAction
+            action: lastAction,
+            sessionId: chatSession?.sessionId || activeSessionId
           })
         );
       }
@@ -499,5 +537,47 @@ Be warm, polite, crisp, and never invent fake product IDs or contradict the offi
   } catch (chatError) {
     console.error("handleChat controller error:", chatError);
     return res.status(500).json(new ApiResponse(false, "Internal server error during chat."));
+  }
+};
+
+/**
+ * Retrieve past chat history for the user or active session.
+ */
+export const getChatHistory = async (req, res) => {
+  const sessionId = req.query.sessionId || req.headers["x-session-id"];
+  let session = null;
+
+  try {
+    if (req.user) {
+      session = await ChatSession.findOne({ userId: req.user._id }).sort({ updatedAt: -1 }).lean();
+    } else if (sessionId) {
+      session = await ChatSession.findOne({ sessionId }).lean();
+    }
+
+    return res.json(
+      new ApiResponse(true, "Chat history retrieved.", {
+        sessionId: session?.sessionId || sessionId || null,
+        messages: session?.messages || []
+      })
+    );
+  } catch (err) {
+    return res.status(500).json(new ApiResponse(false, err.message));
+  }
+};
+
+/**
+ * Clear chat history for user or active session.
+ */
+export const clearChatHistory = async (req, res) => {
+  const sessionId = req.body.sessionId || req.query.sessionId || req.headers["x-session-id"];
+  try {
+    if (req.user) {
+      await ChatSession.deleteMany({ userId: req.user._id });
+    } else if (sessionId) {
+      await ChatSession.deleteOne({ sessionId });
+    }
+    return res.json(new ApiResponse(true, "Chat history cleared."));
+  } catch (err) {
+    return res.status(500).json(new ApiResponse(false, err.message));
   }
 };

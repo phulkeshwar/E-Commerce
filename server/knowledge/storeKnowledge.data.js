@@ -72,7 +72,7 @@ Once dispatched, real-time tracking details and courier links are sent via SMS a
     title: "Customer Helpline, Contact Details & Support Desk",
     tags: ["helpline", "customer care", "contact", "support", "email", "phone", "help", "ticket"],
     content: `GaramBazaar customer support contact options:
-- Official Support Email: support@garambazaar.in
+- Official Support Email: garamsoftwares@gmail.com
 - Online Support Desk: Submit an inquiry or ticket directly at our [Contact Us Page](/contact).
 - Working Hours: Support team is available Monday to Saturday, 9:00 AM to 7:00 PM IST.
 - Response Time: Tickets and emails are typically answered within 2 to 4 business hours.
@@ -114,6 +114,6 @@ Once dispatched, real-time tracking details and courier links are sent via SMS a
     tags: ["sell", "seller portal", "vendor", "affiliate", "partner", "earn"],
     content: `Joining the GaramBazaar ecosystem:
 - Sell with Us: Farmers, craft makers, and organic producers can register to sell via the [Seller Portal](/seller). List products, track sales analytics, and ship to customers across India.
-- Affiliate Program: Earn commission on referrals by joining the GaramBazaar Affiliate network. Contact support@garambazaar.in for merchant and influencer partnerships.`
+- Affiliate Program: Earn commission on referrals by joining the GaramBazaar Affiliate network. Contact garamsoftwares@gmail.com for merchant and influencer partnerships.`
   }
 ];

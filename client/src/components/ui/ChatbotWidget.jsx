@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { sendChatMessageRequest } from "../../api/chat.api";
+import { sendChatMessageRequest, getChatHistoryRequest, clearChatHistoryRequest } from "../../api/chat.api";
 import { createPaymentOrderRequest, verifyPaymentRequest } from "../../api/payment.api";
 import { useAppContext } from "../../hooks/useAppContext";
 import { formatCurrency } from "../../utils/formatCurrency";
@@ -9,12 +9,20 @@ export function ChatbotWidget() {
   const navigate = useNavigate();
   const { cart, isAuthenticated, notify } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      sender: "bot",
-      text: "👋 Namaste! I am GaramAssistant, your AI store concierge and shopping helper.\n\nAsk me about **delivery timelines**, **shipping charges**, **helpline support**, **7-day returns**, or search for **top-rated organic products**!"
+  const [sessionId, setSessionId] = useState(() => {
+    try {
+      return localStorage.getItem("garam_chat_session_id") || null;
+    } catch {
+      return null;
     }
-  ]);
+  });
+
+  const defaultWelcome = {
+    sender: "bot",
+    text: "👋 Namaste! I am GaramAssistant, your AI store concierge and shopping helper.\n\nAsk me about **delivery timelines**, **shipping charges**, **helpline support**, **7-day returns**, or search for **top-rated organic products**!"
+  };
+
+  const [messages, setMessages] = useState([defaultWelcome]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [simulatingOrder, setSimulatingOrder] = useState(null);
@@ -22,12 +30,46 @@ export function ChatbotWidget() {
 
   const chatEndRef = useRef(null);
 
+  // Rehydrate past chat session history when opened
+  useEffect(() => {
+    if (isOpen) {
+      getChatHistoryRequest(sessionId)
+        .then((res) => {
+          if (res && res.messages && res.messages.length > 0) {
+            setMessages(res.messages);
+            if (res.sessionId) {
+              setSessionId(res.sessionId);
+              try {
+                localStorage.setItem("garam_chat_session_id", res.sessionId);
+              } catch {}
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isOpen]);
+
   // Auto-scroll to the bottom of the chat
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, loading, simulatingOrder]);
+
+  const handleClearChat = async () => {
+    try {
+      await clearChatHistoryRequest(sessionId);
+      setMessages([
+        {
+          sender: "bot",
+          text: "👋 Chat history cleared! How can I assist you today?"
+        }
+      ]);
+      notify("Chat history cleared.");
+    } catch (err) {
+      notify("Failed to clear chat history.");
+    }
+  };
 
   const handleSendMessage = async (textToSend) => {
     const text = (textToSend || input).trim();
@@ -47,11 +89,18 @@ export function ChatbotWidget() {
         text: m.text
       }));
 
-      const res = await sendChatMessageRequest(text, history);
+      const res = await sendChatMessageRequest(text, history, sessionId);
 
       if (res && res.message) {
         setMessages((prev) => [...prev, { sender: "bot", text: res.message }]);
         
+        if (res.sessionId) {
+          setSessionId(res.sessionId);
+          try {
+            localStorage.setItem("garam_chat_session_id", res.sessionId);
+          } catch {}
+        }
+
         // Handle direct checkout actions
         if (res.action && res.action.type === "checkout_direct") {
           const { orderId, orderNumber, total } = res.action.payload;
@@ -208,12 +257,21 @@ export function ChatbotWidget() {
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-gray-400 hover:text-white transition-colors cursor-pointer text-lg font-bold"
-            >
-              ✕
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleClearChat}
+                title="Clear chat history"
+                className="text-gray-400 hover:text-amber-400 transition-colors cursor-pointer text-xs p-1.5 rounded-lg hover:bg-white/10"
+              >
+                🗑️
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors cursor-pointer text-lg font-bold p-1 rounded-lg hover:bg-white/10"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
           {/* Chat Window Body */}
