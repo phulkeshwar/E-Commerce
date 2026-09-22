@@ -626,6 +626,7 @@ export function AdminPage() {
               subscribersList={subscribersList}
               loadingSubscribers={loadingSubscribers}
               notify={notify}
+              loadSubscribers={loadSubscribers}
             />
           ) : null}
 

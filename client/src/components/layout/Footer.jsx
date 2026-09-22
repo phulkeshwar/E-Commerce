@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAppContext } from "../../hooks/useAppContext";
+import { subscribeNewsletterRequest } from "../../api/newsletter.api";
 
 const footerLinks = {
   Shop: [
@@ -16,6 +17,7 @@ const footerLinks = {
     { label: "Track Order", to: "/orders" },
     { label: "Contact Us", to: "/contact" },
     { label: "FAQ", to: "/info/faq" },
+    { label: "Unsubscribe Newsletter", to: "/unsubscribe" },
   ],
   Company: [
     { label: "About Us", to: "/info/about-us" },
@@ -39,30 +41,69 @@ const socialLinks = [
 export function Footer() {
   const { notify } = useAppContext();
   const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(
     localStorage.getItem("newsletter_subscribed") === "true"
   );
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (!email.trim()) {
+    const cleanEmail = email.trim();
+    if (!cleanEmail) {
+      notify("Please enter your email address.");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
       notify("Please enter a valid email address.");
       return;
     }
-    localStorage.setItem("newsletter_subscribed", "true");
-    setIsSubscribed(true);
-    notify("Subscribed successfully! Thank you for staying in the loop.");
+
+    setSubmitting(true);
+    try {
+      const res = await subscribeNewsletterRequest(cleanEmail, "footer");
+      localStorage.setItem("newsletter_subscribed", "true");
+      setIsSubscribed(true);
+      setEmail("");
+      notify(res?.message || "Subscribed successfully! Check your inbox for your 10% coupon code.");
+    } catch (err) {
+      if (err.message && err.message.includes("already subscribed")) {
+        localStorage.setItem("newsletter_subscribed", "true");
+        setIsSubscribed(true);
+      }
+      notify(err.message || "Failed to subscribe. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <>
       {/* ── Newsletter Strip ──────────────────────────────────────── */}
-      {!isSubscribed && (
+      {isSubscribed ? (
+        <div className="bg-[#2c1a0e] py-3 px-4 border-b border-white/10 text-center text-xs text-amber-200/90 flex items-center justify-center gap-3 flex-wrap">
+          <span>✨ You are subscribed to GaramBazaar updates & exclusive offers!</span>
+          <Link
+            to="/unsubscribe"
+            className="text-amber-400 underline hover:text-white transition-colors text-[11px]"
+          >
+            Manage or Unsubscribe
+          </Link>
+          <button
+            type="button"
+            onClick={() => setIsSubscribed(false)}
+            className="text-gray-400 hover:text-gray-200 text-[11px] underline ml-2 cursor-pointer"
+          >
+            Subscribe another email
+          </button>
+        </div>
+      ) : (
         <div className="bg-[#c4622d] py-8 px-4 md:px-8">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4 md:gap-8">
             <div className="text-center md:text-left flex-1">
               <p className="text-white/80 text-sm font-medium uppercase tracking-widest mb-1">Stay in the loop</p>
               <h3 className="text-white text-xl md:text-2xl font-bold">Get exclusive deals & new arrivals</h3>
+              <p className="text-white/80 text-xs mt-1">Get 10% OFF your first order with coupon code <span className="font-mono font-bold text-amber-300">GARAM10</span></p>
             </div>
             <form
               className="flex w-full md:w-auto min-w-0 md:min-w-[380px] rounded-lg overflow-hidden
@@ -74,14 +115,16 @@ export function Footer() {
                 placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 px-4 py-3 text-sm text-gray-800 bg-white outline-none min-w-0"
+                disabled={submitting}
+                className="flex-1 px-4 py-3 text-sm text-gray-800 bg-white outline-none min-w-0 disabled:opacity-75"
               />
               <button
                 type="submit"
+                disabled={submitting}
                 className="bg-[#2c1a0e] hover:bg-black text-amber-400 font-bold
-                           text-sm px-5 py-3 whitespace-nowrap transition-colors"
+                           text-sm px-5 py-3 whitespace-nowrap transition-colors disabled:opacity-60 cursor-pointer"
               >
-                Subscribe
+                {submitting ? "Subscribing..." : "Subscribe"}
               </button>
             </form>
           </div>
