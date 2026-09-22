@@ -44,11 +44,10 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-userSchema.pre("save", function (next) {
+userSchema.pre("save", function () {
   if (this.role === "admin") {
     this.isVerified = true;
   }
-  next();
 });
 
 userSchema.methods.toClient = function toClient() {
