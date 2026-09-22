@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ProductGrid } from "../components/product/ProductGrid";
 import { Spinner } from "../components/ui/Spinner";
@@ -7,6 +7,7 @@ import { useDebounce } from "../hooks/useDebounce";
 import { useProducts } from "../hooks/useProducts";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
 import { Pagination } from "../components/ui/Pagination";
+import { scrollToTop } from "../utils/scrollToTop";
 
 const sortOptions = [
   { value: "relevance",  label: "Relevance" },
@@ -83,6 +84,10 @@ export function ShopPage() {
     [badge, category, debouncedSearch, page, debouncedPriceMin, debouncedPriceMax, sort]
   );
   const { products, loading, error, pagination } = useProducts(filters);
+
+  useEffect(() => {
+    scrollToTop({ behavior: "smooth" });
+  }, [page]);
 
   const sortedProducts = useMemo(() => {
     let list = [...products];

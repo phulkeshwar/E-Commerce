@@ -11,6 +11,7 @@ import { Pagination } from "../components/ui/Pagination";
 import { Modal } from "../components/ui/Modal";
 import { createReturnRequest } from "../api/return.api";
 import { OrderChatDrawer } from "../components/ui/OrderChatDrawer";
+import { scrollToTop } from "../utils/scrollToTop";
 
 export function OrdersPage() {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ export function OrdersPage() {
 
   useEffect(() => {
     orders.reload(currentPage, 5);
+    scrollToTop({ behavior: "smooth" });
   }, [currentPage, orders.reload]);
 
   const handleOpenReturnModal = (order) => {

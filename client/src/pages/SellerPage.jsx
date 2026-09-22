@@ -37,11 +37,16 @@ import { SellerReviewsTab } from "../components/seller/SellerReviewsTab";
 import { SellerFaqsTab } from "../components/seller/SellerFaqsTab";
 import { SellerCouponsTab } from "../components/seller/SellerCouponsTab";
 import { SellerBulkUploadTab } from "../components/seller/SellerBulkUploadTab";
+import { scrollToTop } from "../utils/scrollToTop";
 
 export function SellerPage() {
   const { user, notify, confirm } = useAppContext();
   const navigate = useNavigate();
   const [section, setSection] = useState("overview");
+
+  useEffect(() => {
+    scrollToTop({ behavior: "instant" });
+  }, [section]);
 
   // AI draft states
   const [loadingAIDraft, setLoadingAIDraft] = useState({});

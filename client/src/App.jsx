@@ -19,6 +19,7 @@ import { getWishlistRequest, toggleWishlistRequest } from "./api/wishlist.api";
 import { getCategoriesRequest } from "./api/category.api";
 import { CookieBanner } from "./components/ui/CookieBanner";
 import { ChatbotWidget } from "./components/ui/ChatbotWidget";
+import { scrollToTop } from "./utils/scrollToTop";
 
 // Lazy loaded page components for optimal initial bundle sizes and fast page loads
 const AccountPage = lazy(() => import("./pages/AccountPage").then(m => ({ default: m.AccountPage })));
@@ -45,12 +46,11 @@ const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage").then(m => (
 const SavedAddressesPage = lazy(() => import("./pages/SavedAddressesPage").then(m => ({ default: m.SavedAddressesPage })));
 
 function ScrollToTop() {
-
-  const { pathname } = useLocation();
+  const { pathname, search, hash } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    scrollToTop({ behavior: "instant" });
+  }, [pathname, search, hash]);
 
   return null;
 }

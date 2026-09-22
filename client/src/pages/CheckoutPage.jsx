@@ -10,6 +10,7 @@ import { useAppContext } from "../hooks/useAppContext";
 import { formatCurrency } from "../utils/formatCurrency";
 import { validatePincode, lookupPincode } from "../utils/validatePincode";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { scrollToTop } from "../utils/scrollToTop";
 
 const paymentOptions = [
   { id: "upi", icon: "📲", name: "UPI", desc: "PhonePe, GPay, Paytm" },
@@ -86,6 +87,11 @@ export function CheckoutPage() {
   });
   const [showGuestPrompt, setShowGuestPrompt] = useState(!isAuthenticated);
   const [step, setStep] = useState(1);
+
+  // Scroll to top whenever checkout step changes (Step 1 Delivery -> Step 2 Payment -> Step 3 Review -> Step 4 Confirmation)
+  useEffect(() => {
+    scrollToTop({ behavior: "instant" });
+  }, [step]);
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [placingOrder, setPlacingOrder] = useState(false);
   const [simulatingOrder, setSimulatingOrder] = useState(null);

@@ -35,10 +35,15 @@ import { AdminSellerVerifyTab } from "../components/admin/AdminSellerVerifyTab";
 import { AdminReviewModTab } from "../components/admin/AdminReviewModTab";
 import { AdminSupportTab } from "../components/admin/AdminSupportTab";
 import { AdminSettingsTab } from "../components/admin/AdminSettingsTab";
+import { scrollToTop } from "../utils/scrollToTop";
 
 export function AdminPage() {
   const { user, login, logout, notify, categories, reloadCategories, confirm } = useAppContext();
   const [section, setSection] = useState("overview");
+
+  useEffect(() => {
+    scrollToTop({ behavior: "instant" });
+  }, [section]);
 
   // Custom AI popup prompt configuration
   const [promptConfig, setPromptConfig] = useState(null);
