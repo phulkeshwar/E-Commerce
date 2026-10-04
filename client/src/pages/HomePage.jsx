@@ -94,6 +94,8 @@ export function HomePage() {
       home: { color: "bg-blue-50 border-blue-200", text: "text-blue-700" },
       "personal care": { color: "bg-pink-50 border-pink-200", text: "text-pink-700" },
       health: { color: "bg-green-50 border-green-200", text: "text-green-700" },
+      software: { color: "bg-indigo-50 border-indigo-200", text: "text-indigo-700" },
+      gadgets: { color: "bg-amber-50 border-amber-300", text: "text-amber-800" },
     };
     const key = name.toLowerCase().trim();
     if (presets[key]) return presets[key];

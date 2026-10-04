@@ -17,8 +17,9 @@ export function AdminOverviewTab({
     const points = data.map((val, idx) => {
       const x = (idx / (data.length - 1)) * (width - 40) + 20;
       const y = height - ((val / maxVal) * (height - 40) + 20);
-      return { x, y, val, label: salesAnalytics.labels[idx] };
+      return { x, y, val, label: salesAnalytics?.labels?.[idx] || "" };
     });
+    if (!points || points.length === 0) return { points: [], path: "", areaPath: "" };
     let path = `M ${points[0].x} ${points[0].y}`;
     for (let i = 1; i < points.length; i++) {
       path += ` L ${points[i].x} ${points[i].y}`;
@@ -102,9 +103,9 @@ export function AdminOverviewTab({
                   </svg>
 
                   <div className="flex justify-between text-[9px] font-bold text-gray-400 mt-2 px-4">
-                    <span>{salesAnalytics.labels[0]}</span>
-                    <span>{salesAnalytics.labels[14]}</span>
-                    <span>{salesAnalytics.labels[29]}</span>
+                    <span>{salesAnalytics?.labels?.[0] || ""}</span>
+                    <span>{salesAnalytics?.labels?.[14] || ""}</span>
+                    <span>{salesAnalytics?.labels?.[29] || ""}</span>
                   </div>
                 </div>
               );
@@ -117,7 +118,7 @@ export function AdminOverviewTab({
               📦 30-Day Orders Volume
             </h3>
             {(() => {
-              const bars = drawBarChart(salesAnalytics.orderData);
+              const bars = drawBarChart(salesAnalytics?.orderData);
               return (
                 <div className="relative">
                   <svg className="w-full h-52 overflow-visible" viewBox="0 0 600 200">
@@ -142,9 +143,9 @@ export function AdminOverviewTab({
                   </svg>
 
                   <div className="flex justify-between text-[9px] font-bold text-gray-400 mt-2 px-4">
-                    <span>{salesAnalytics.labels[0]}</span>
-                    <span>{salesAnalytics.labels[14]}</span>
-                    <span>{salesAnalytics.labels[29]}</span>
+                    <span>{salesAnalytics?.labels?.[0] || ""}</span>
+                    <span>{salesAnalytics?.labels?.[14] || ""}</span>
+                    <span>{salesAnalytics?.labels?.[29] || ""}</span>
                   </div>
                 </div>
               );

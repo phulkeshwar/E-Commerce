@@ -65,11 +65,13 @@ export function ProductCard({ product }) {
         </div>
 
         {/* Badges */}
-        {product.badge && (
+        {(product.badge || product.source === "amazon") && (
           <span className={`absolute top-2 left-2 px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wide
-            ${product.badge === "sale" ? "bg-[#c4622d] text-white" :
-              product.badge === "new" ? "bg-emerald-600 text-white" : "bg-gray-700 text-white"}`}>
-            {product.badge}
+            ${product.badge?.toLowerCase() === "sale" ? "bg-[#c4622d] text-white" :
+              product.badge?.toLowerCase() === "new" ? "bg-emerald-600 text-white" :
+              product.source === "amazon" ? "bg-[#232f3e] text-amber-400 border border-amber-400/30" :
+              "bg-gray-700 text-white"}`}>
+            {product.badge || "Amazon"}
           </span>
         )}
 

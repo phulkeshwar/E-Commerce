@@ -22,7 +22,6 @@ const buildMongoQuery = (req) => {
   if (category === "Software") {
     filters.productType = "affiliate";
   } else if (category !== "All") {
-    filters.productType = "organic";
     filters.category = category;
   }
 
@@ -50,27 +49,31 @@ const buildMongoQuery = (req) => {
     }
   }
 
-  // Draft vs Published logic
-  if (!req.user || req.user.role === "user") {
-    filters.isPublished = true;
-  } else if (req.user.role === "seller") {
-    if (filters.$text) {
-      // If doing a text search, we need to combine it with $or for published vs owner
-      filters.$and = [
-        { $text: { $search: search } },
-        {
-          $or: [
-            { isPublished: true },
-            { seller: req.user._id }
-          ]
-        }
-      ];
-      delete filters.$text; // Remove top-level $text search
-    } else {
-      filters.$or = [
-        { isPublished: true },
-        { seller: req.user._id }
-      ];
+  // Draft vs Published logic: only show unpublished if explicitly requested in admin view
+  const includeUnpublished = query.includeUnpublished === "true" && req.user?.role === "admin";
+
+  if (!includeUnpublished) {
+    if (!req.user || req.user.role === "user" || req.user.role === "admin") {
+      filters.isPublished = true;
+    } else if (req.user.role === "seller") {
+      if (filters.$text) {
+        // If doing a text search, we need to combine it with $or for published vs owner
+        filters.$and = [
+          { $text: { $search: search } },
+          {
+            $or: [
+              { isPublished: true },
+              { seller: req.user._id }
+            ]
+          }
+        ];
+        delete filters.$text; // Remove top-level $text search
+      } else {
+        filters.$or = [
+          { isPublished: true },
+          { seller: req.user._id }
+        ];
+      }
     }
   }
 

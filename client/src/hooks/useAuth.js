@@ -10,23 +10,42 @@ export function useAuth() {
   const [session, setSession] = useState(() => getStoredSession());
   const [loading, setLoading] = useState(false);
 
+  const refreshUser = async () => {
+    const storedSession = getStoredSession();
+    if (!storedSession?.token) {
+      return null;
+    }
+
+    try {
+      const data = await meRequest();
+      if (data?.user) {
+        const nextSession = { ...storedSession, user: data.user };
+        setSession(nextSession);
+        setStoredSession(nextSession);
+        return data.user;
+      }
+    } catch (err) {
+      console.error("Failed to refresh user profile:", err);
+    }
+    return null;
+  };
+
   useEffect(() => {
     const storedSession = getStoredSession();
-
     if (!storedSession?.token) {
       return;
     }
 
-    meRequest()
-      .then((data) => {
-        const nextSession = { ...storedSession, user: data.user };
-        setSession(nextSession);
-        setStoredSession(nextSession);
-      })
-      .catch(() => {
-        setSession(null);
-        clearStoredSession();
-      });
+    refreshUser();
+
+    // Auto-refresh when tab regains focus (e.g. returning after verifying email in another tab)
+    const handleFocus = () => {
+      refreshUser();
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
   }, []);
 
   const login = async (payload) => {
@@ -101,5 +120,6 @@ export function useAuth() {
     googleLogin,
     logout,
     updateProfile,
+    refreshUser,
   };
 }

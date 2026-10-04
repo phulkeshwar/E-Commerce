@@ -6,5 +6,8 @@ export const createSupportTicketRequest = (payload) =>
 export const getSupportTicketsRequest = (page = 1, limit = 10) =>
   apiRequest(`/support?page=${page}&limit=${limit}`);
 
-export const resolveSupportTicketRequest = (id) =>
-  apiRequest(`/support/${id}/resolve`, { method: "PATCH" });
+export const resolveSupportTicketRequest = (id, replyMessage = "") =>
+  apiRequest(`/support/${id}/resolve`, {
+    method: "PATCH",
+    body: replyMessage ? { replyMessage } : {},
+  });

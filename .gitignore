@@ -39,6 +39,8 @@ yarn-debug.log*
 .env
 .env.*
 *.pem
+*-credentials.csv
+*credentials*.csv
 # Auto-added standard ignores
 __pycache__/
 .venv/

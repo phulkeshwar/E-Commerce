@@ -9,6 +9,7 @@ export const seedCategories = async () => {
       { name: "Personal Care", emoji: "🧴", slug: "personal-care" },
       { name: "Health", emoji: "🩺", slug: "health" },
       { name: "Software", emoji: "💻", slug: "software" },
+      { name: "Gadgets", emoji: "⚡", slug: "gadgets" },
     ];
     for (const cat of defaultCategories) {
       const exists = await Category.findOne({ name: cat.name });

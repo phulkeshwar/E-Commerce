@@ -168,6 +168,9 @@ export const googleLogin = async (req, res) => {
       const errText = await response.text();
       return res.status(400).json(new ApiResponse(false, `Failed to verify Google token: ${errText}`));
     }
+
+    const payload = await response.json();
+
     if (!process.env.GOOGLE_CLIENT_ID) {
       return res.status(500).json(new ApiResponse(false, "Google OAuth is not configured on the server."));
     }
@@ -431,7 +434,7 @@ export const sendEmailVerification = async (req, res) => {
     user.emailVerificationExpires = undefined;
     await user.save();
     console.error("Failed to send email verification:", err.message);
-    return res.status(500).json(new ApiResponse(false, "Could not send verification email. Please try again later."));
+    return res.status(500).json(new ApiResponse(false, `Could not send verification email: ${err.message}`));
   }
 };
 
@@ -448,6 +451,9 @@ export const verifyEmail = async (req, res) => {
   });
 
   if (!user) {
+    if (req.user?.isVerified) {
+      return res.json(new ApiResponse(true, "Your email is already verified!", { user: req.user.toClient() }));
+    }
     return res.status(400).json(new ApiResponse(false, "Verification token is invalid or has expired."));
   }
 
@@ -456,7 +462,7 @@ export const verifyEmail = async (req, res) => {
   user.emailVerificationExpires = undefined;
   await user.save();
 
-  return res.json(new ApiResponse(true, "Email verified successfully! You can now access all features."));
+  return res.json(new ApiResponse(true, "Email verified successfully! You can now access all features.", { user: user.toClient() }));
 };
 
 export const deleteAccount = async (req, res) => {

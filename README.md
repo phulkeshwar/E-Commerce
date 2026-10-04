@@ -534,8 +534,8 @@ All protected routes require: `Authorization: Bearer <access_token>`
 ```json
 // Request body
 {
-  "name": "Phulkeshwar Mahto",
-  "email": "phulkeshwar@example.com",
+  "name": "Your Name",
+  "email": "youremail@example.com",
   "password": "securePass123"
 }
 
@@ -617,7 +617,7 @@ All protected routes require: `Authorization: Bearer <access_token>`
     { "productId": "...", "qty": 2 }
   ],
   "shippingAddress": {
-    "name": "Phulkeshwar Mahto",
+    "name": "Your Name",
     "phone": "9800000001",
     "line1": "12 MG Road",
     "city": "Ranchi",

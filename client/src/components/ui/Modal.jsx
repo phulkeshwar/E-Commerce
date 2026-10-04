@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
-export function Modal({ title, children, onClose }) {
+export function Modal({ title, children, onClose, className = "" }) {
   const modalCardRef = useRef(null);
   const closeBtnRef = useRef(null);
 
@@ -86,7 +86,7 @@ export function Modal({ title, children, onClose }) {
     <div className="modal-backdrop" onClick={onClose} role="presentation">
       <div
         ref={modalCardRef}
-        className="modal-card"
+        className={`modal-card ${className}`.trim()}
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"

@@ -6,8 +6,8 @@ await connectDB();
 
 const users = [
   {
-    name: "Phulkeshwar Mahto",
-    email: "phulkeshwar@example.com",
+    name: "Your Name",
+    email: "yourname@example.com",
     password: process.env.SEED_USER_PASSWORD,
     role: "user",
     membership: "Gold",

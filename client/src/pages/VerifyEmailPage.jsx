@@ -3,10 +3,12 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { verifyEmailRequest } from "../api/auth.api";
 import { Spinner } from "../components/ui/Spinner";
 import { useDocumentMetadata } from "../hooks/useDocumentMetadata";
+import { useAppContext } from "../hooks/useAppContext";
 
 export function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { refreshUser, isAuthenticated } = useAppContext();
   const token = searchParams.get("token");
   const [status, setStatus] = useState("loading"); // loading, success, error
   const [message, setMessage] = useState("");
@@ -25,10 +27,11 @@ export function VerifyEmailPage() {
     }
 
     verifyEmailRequest({ token })
-      .then((res) => {
+      .then(async (res) => {
         if (res.success) {
           setStatus("success");
           setMessage(res.message || "Your email has been verified successfully!");
+          await refreshUser?.();
         } else {
           setStatus("error");
           setMessage(res.message || "Failed to verify email. Token may be expired.");
@@ -65,10 +68,10 @@ export function VerifyEmailPage() {
               Your account is now fully active. You can browse, review, buy, and list natural products.
             </p>
             <button
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate(isAuthenticated ? "/account" : "/auth")}
               className="w-full bg-[#c4622d] hover:bg-[#a95223] text-white font-bold py-3 px-6 rounded-xl hover:shadow-md transition-all border-0 cursor-pointer text-sm"
             >
-              Log In to My Account
+              {isAuthenticated ? "Go to My Account" : "Log In to My Account"}
             </button>
           </div>
         )}

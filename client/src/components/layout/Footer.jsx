@@ -10,6 +10,7 @@ const footerLinks = {
     { label: "Home", to: "/shop?category=Home" },
     { label: "Personal Care", to: "/shop?category=Personal+Care" },
     { label: "Health", to: "/shop?category=Health" },
+    { label: "Gadgets", to: "/shop?category=Gadgets" },
   ],
   Help: [
     { label: "Shipping Policy", to: "/info/shipping-policy" },

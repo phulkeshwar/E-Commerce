@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppContext } from "../hooks/useAppContext";
 import { Input } from "../components/ui/Input";
@@ -8,9 +8,13 @@ import { apiRequest } from "../api/axios";
 import { getStoredSession } from "../store/authStore";
 
 export function AccountPage() {
-  const { user, logout, orders, updateProfile, notify, confirm } = useAppContext();
+  const { user, logout, orders, updateProfile, notify, confirm, refreshUser } = useAppContext();
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    refreshUser?.();
+  }, []);
 
   // Loyalty Progression Calculations
   const points = user?.loyaltyPoints || 0;

@@ -19,6 +19,7 @@ import { getWishlistRequest, toggleWishlistRequest } from "./api/wishlist.api";
 import { getCategoriesRequest } from "./api/category.api";
 import { CookieBanner } from "./components/ui/CookieBanner";
 import { ChatbotWidget } from "./components/ui/ChatbotWidget";
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
 import { scrollToTop } from "./utils/scrollToTop";
 
 // Lazy loaded page components for optimal initial bundle sizes and fast page loads
@@ -243,37 +244,39 @@ export default function App() {
           <Navbar />
           <main className="main-shell">
             <PageTransition>
-              <Suspense fallback={
-                <div className="flex items-center justify-center min-h-[50vh]">
-                  <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              }>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/shop" element={<ShopPage />} />
-                  <Route path="/products/:id" element={<ProductDetailPage />} />
-                  <Route path="/cart" element={<CartPage />} />
-                  <Route path="/checkout" element={<CheckoutPage />} />
-                  <Route path="/orders" element={<OrdersPage />} />
-                  <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
-                  <Route path="/wishlist" element={<WishlistPage />} />
-                  <Route path="/account" element={<AccountPage />} />
-                  <Route path="/admin" element={<AdminPage />} />
-                  <Route path="/seller" element={<SellerPage />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                  <Route path="/reset-password" element={<ResetPasswordPage />} />
-                  <Route path="/seller/:id" element={<SellerStorePage />} />
-                  <Route path="/verify-email" element={<VerifyEmailPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/vs-competitors" element={<VSCompetitorsPage />} />
-                  <Route path="/info/:slug" element={<StaticContentPage />} />
-                  <Route path="/unsubscribe" element={<UnsubscribePage />} />
-                  <Route path="/saved-addresses" element={<SavedAddressesPage />} />
-                  <Route path="/addresses" element={<SavedAddressesPage />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Routes>
-              </Suspense>
+              <ErrorBoundary>
+                <Suspense fallback={
+                  <div className="flex items-center justify-center min-h-[50vh]">
+                    <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                }>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/shop" element={<ShopPage />} />
+                    <Route path="/products/:id" element={<ProductDetailPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/orders" element={<OrdersPage />} />
+                    <Route path="/order-success/:orderId" element={<OrderSuccessPage />} />
+                    <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/account" element={<AccountPage />} />
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/seller" element={<SellerPage />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
+                    <Route path="/seller/:id" element={<SellerStorePage />} />
+                    <Route path="/verify-email" element={<VerifyEmailPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/vs-competitors" element={<VSCompetitorsPage />} />
+                    <Route path="/info/:slug" element={<StaticContentPage />} />
+                    <Route path="/unsubscribe" element={<UnsubscribePage />} />
+                    <Route path="/saved-addresses" element={<SavedAddressesPage />} />
+                    <Route path="/addresses" element={<SavedAddressesPage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Routes>
+                </Suspense>
+              </ErrorBoundary>
             </PageTransition>
           </main>
           <Footer />

@@ -8,6 +8,7 @@ const supportTicketSchema = new mongoose.Schema(
     subject: { type: String, required: true, trim: true },
     message: { type: String, required: true, trim: true },
     status: { type: String, enum: ["open", "resolved"], default: "open" },
+    adminReply: { type: String, default: "" },
   },
   { timestamps: true }
 );
@@ -21,6 +22,7 @@ supportTicketSchema.methods.toClient = function toClient() {
     subject: this.subject,
     message: this.message,
     status: this.status,
+    adminReply: this.adminReply || "",
     createdAt: this.createdAt,
   };
 };

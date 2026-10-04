@@ -11,6 +11,8 @@
     "seed:all": "node seeds/products.seed.js && node seeds/users.seed.js && node seeds/orders.seed.js",
     "seed:clear": "node seeds/clear.js",
     "import:affiliate": "node scripts/importAffiliateProducts.js",
+    "import:gadgets": "node scripts/importAmazonGadgets.js",
+    "import:amazon": "node scripts/importFromAmazonApi.js",
     "test": "node --test tests/integration.test.js"
   },
   "dependencies": {

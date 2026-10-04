@@ -230,7 +230,7 @@ export function AuthPage() {
                   <input
                     type="text"
                     required
-                    placeholder="Phulkeshwar Mahto"
+                    placeholder="Your Name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm
