@@ -59,6 +59,118 @@ export function ProductDetailPage() {
   const [offersExpanded, setOffersExpanded] = useState(false);
   const [specsOpen, setSpecsOpen] = useState(true);
 
+  // ── Product-Level SEO ────────────────────────────────────────────────────────
+  const productImageUrl = useMemo(() => {
+    return product?.images?.[0]?.url || product?.images?.[0] || product?.imageUrl || "";
+  }, [product]);
+
+  const productDescriptionText = useMemo(() => {
+    if (!product) return "";
+    const cleanDesc = (product.description || "").replace(/<[^>]+>/g, " ").trim();
+    if (cleanDesc.length > 155) return cleanDesc.slice(0, 152) + "...";
+    return cleanDesc || `Buy ${product.name} at GaramBazaar with fast delivery across India.`;
+  }, [product]);
+
+  const productKeywords = useMemo(() => {
+    if (!product) return "";
+    const tags = Array.isArray(product.tags) ? product.tags : [];
+    const keywordsList = [
+      product.name,
+      product.category,
+      product.brand || "GaramBazaar",
+      ...tags,
+      "buy online",
+      "best price in India",
+      "GaramBazaar"
+    ].filter(Boolean);
+    return keywordsList.join(", ");
+  }, [product]);
+
+  const productSchema = useMemo(() => {
+    if (!product) return null;
+    const currentUrl = typeof window !== "undefined"
+      ? `${window.location.origin}/products/${product.slug || product.id}`
+      : `https://garambazaar.vercel.app/products/${product.slug || product.id}`;
+    
+    const imageUrl = productImageUrl || "https://garambazaar.vercel.app/favicon.png";
+
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Product",
+          "@id": `${currentUrl}#product`,
+          name: product.name,
+          url: currentUrl,
+          image: [imageUrl],
+          description: product.description || product.name,
+          sku: product.sku || product.asin || product.id,
+          mpn: product.asin || product.sku || product.id,
+          brand: {
+            "@type": "Brand",
+            name: product.brand || "GaramBazaar"
+          },
+          category: product.category,
+          offers: {
+            "@type": "Offer",
+            url: currentUrl,
+            priceCurrency: "INR",
+            price: Number(product.price) || 0,
+            priceValidUntil: "2027-12-31",
+            itemCondition: "https://schema.org/NewCondition",
+            availability: product.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            seller: {
+              "@type": "Organization",
+              name: product.seller || "GaramBazaar"
+            }
+          },
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(product.rating) || 4.5,
+            reviewCount: Number(product.reviewCount) || 12,
+            bestRating: 5,
+            worstRating: 1
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": `${currentUrl}#breadcrumb`,
+          itemListElement: [
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "Home",
+              item: "https://garambazaar.vercel.app/"
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: product.category || "Shop",
+              item: `https://garambazaar.vercel.app/shop?category=${encodeURIComponent(product.category || "All")}`
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: product.name,
+              item: currentUrl
+            }
+          ]
+        }
+      ]
+    };
+  }, [product, productImageUrl]);
+
+  useDocumentMetadata({
+    title: product ? `${product.name} - Buy Online` : "Loading Product...",
+    description: productDescriptionText,
+    keywords: productKeywords,
+    image: productImageUrl,
+    type: "product",
+    price: product?.price,
+    currency: "INR",
+    schema: productSchema,
+  });
+
   // AI Review Summary States & Effects
   const [summaryData, setSummaryData] = useState(null);
   const [loadingSummary, setLoadingSummary] = useState(false);

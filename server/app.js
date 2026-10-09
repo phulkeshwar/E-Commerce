@@ -102,6 +102,19 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/affiliate", affiliateRoutes);
 app.use("/api/ai", aiRoutes);
 
+// Dynamic XML Sitemap for Search Engines
+app.get(["/sitemap.xml", "/api/sitemap.xml"], async (_req, res, next) => {
+  try {
+    const { generateSitemapXml } = await import("./scripts/generateSitemap.js");
+    const { xml } = await generateSitemapXml();
+    res.header("Content-Type", "application/xml; charset=utf-8");
+    res.header("Cache-Control", "public, max-age=3600");
+    res.send(xml);
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.use(errorHandler);
 
 export default app;

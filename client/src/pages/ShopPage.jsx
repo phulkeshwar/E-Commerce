@@ -52,12 +52,6 @@ export function ShopPage() {
   const { categories } = useAppContext();
   const categoryNames = useMemo(() => ["All", ...categories.map((c) => c.name)], [categories]);
 
-  useDocumentMetadata({
-    title: "Shop Organic Essentials",
-    description: "Browse GaramBazaar's premium catalog of 100% natural, farm-fresh products. Filter by category, price, and active deals with secure nationwide shipping."
-  });
-  const [inStockOnly, setInStockOnly] = useState(false);
-
   const search   = searchParams.get("search") || "";
   const category = searchParams.get("category") || "All";
   const badge    = searchParams.get("badge") || "";
@@ -65,6 +59,52 @@ export function ShopPage() {
   const page     = Math.max(1, Number(searchParams.get("page") || 1));
   const priceMin = searchParams.get("priceMin") || "";
   const priceMax = searchParams.get("priceMax") || "";
+
+  // ── Dynamic Shop & Category SEO ─────────────────────────────────────────────
+  const shopPageTitle = useMemo(() => {
+    let t = "Shop Catalog";
+    if (search) t = `Search results for "${search}"`;
+    else if (category && category !== "All") t = `${category} - Buy Online Deals`;
+    else if (badge) t = `${badge} Products`;
+    if (page > 1) t += ` (Page ${page})`;
+    return t;
+  }, [search, category, badge, page]);
+
+  const shopPageDescription = useMemo(() => {
+    if (search) return `Explore top products matching "${search}" at GaramBazaar with verified ratings and rapid delivery across India.`;
+    if (category && category !== "All") return `Discover premium ${category} with authentic quality, unbeatable festive deals, and secure payment at GaramBazaar.`;
+    return "Browse GaramBazaar's curated catalog of premium electronics, home gadgets, daily essentials, and artisan goods. Shop online with secure nationwide delivery.";
+  }, [search, category]);
+
+  const shopPageKeywords = useMemo(() => {
+    const list = [category !== "All" ? category : null, "buy online India", "ecommerce deals", "fast shipping", "GaramBazaar", search || null].filter(Boolean);
+    return list.join(", ");
+  }, [category, search]);
+
+  const shopSchema = useMemo(() => {
+    const currentUrl = typeof window !== "undefined" ? window.location.href : "https://garambazaar.vercel.app/shop";
+    return {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: shopPageTitle,
+      description: shopPageDescription,
+      url: currentUrl,
+      isPartOf: {
+        "@type": "WebSite",
+        name: "GaramBazaar",
+        url: "https://garambazaar.vercel.app/"
+      }
+    };
+  }, [shopPageTitle, shopPageDescription]);
+
+  useDocumentMetadata({
+    title: shopPageTitle,
+    description: shopPageDescription,
+    keywords: shopPageKeywords,
+    schema: shopSchema,
+  });
+
+  const [inStockOnly, setInStockOnly] = useState(false);
 
   const debouncedSearch = useDebounce(search);
   const debouncedPriceMin = useDebounce(priceMin);

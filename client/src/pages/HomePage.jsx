@@ -87,6 +87,52 @@ export function HomePage() {
   const timer = useTimer();
   const { categories } = useAppContext();
 
+  // ── Homepage SEO ────────────────────────────────────────────────────────────
+  const homeSchema = useMemo(() => {
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://garambazaar.vercel.app/#website",
+          url: "https://garambazaar.vercel.app/",
+          name: "GaramBazaar",
+          description: "India's online destination for top-rated electronics, audio, computing, home gear, and daily essentials.",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: "https://garambazaar.vercel.app/shop?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://garambazaar.vercel.app/#organization",
+          name: "GaramBazaar",
+          url: "https://garambazaar.vercel.app/",
+          logo: {
+            "@type": "ImageObject",
+            url: "https://garambazaar.vercel.app/favicon.png"
+          },
+          sameAs: [
+            "https://www.facebook.com/GaramBazaar",
+            "https://www.instagram.com/GaramBazaar"
+          ]
+        }
+      ]
+    };
+  }, []);
+
+  useDocumentMetadata({
+    title: "India's Leading Store - Deals on Tech, Gadgets & Daily Essentials",
+    description: "Shop authentic electronics, smart home gadgets, gaming gear, headphones, and daily essentials with unbeatable prices, rapid nationwide delivery, and genuine warranties at GaramBazaar.",
+    keywords: "online shopping india, electronics sale, headphones, laptops, smart home, gaming gear, home essentials, festive offers, GaramBazaar",
+    image: "https://garambazaar.vercel.app/favicon.png",
+    schema: homeSchema,
+  });
+
   const getCategoryStyles = (name, index) => {
     const presets = {
       pantry: { color: "bg-orange-50 border-orange-200", text: "text-orange-700" },

@@ -14,5 +14,6 @@ Disallow: /checkout/
 Disallow: /cart/
 Disallow: /orders/
 Disallow: /account/
+Disallow: /api/
 
 Sitemap: https://garambazaar.vercel.app/sitemap.xml

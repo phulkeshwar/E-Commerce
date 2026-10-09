@@ -89,6 +89,16 @@
     @apply pointer-events-none animate-pageOut;
   }
 
+  .no-scrollbar::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar,
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   .page-content {
     width: min(1280px, calc(100% - 1rem));
     @apply mx-auto pb-6;

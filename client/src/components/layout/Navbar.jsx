@@ -387,107 +387,96 @@ export function Navbar() {
       )}
 
       {/* ── Categories Nav Bar ───────────────────────────────────────────── */}
-      <nav className="bg-[#232f3e] relative z-[150]">
-        {/* Desktop */}
-        <div className="hidden md:flex items-center gap-1 px-4 min-h-[40px]">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `px-3 py-1.5 text-[0.82rem] font-semibold whitespace-nowrap rounded
-               transition-colors ${isActive
-                ? "text-amber-400 bg-white/10"
-                : "text-white/85 hover:text-white hover:bg-white/10"}`
-            }
-          >
-            Home
-          </NavLink>
-          <NavLink
-            to="/shop"
-            className={({ isActive }) =>
-              `px-3 py-1.5 text-[0.82rem] font-semibold whitespace-nowrap rounded
-               transition-colors ${isActive
-                ? "text-amber-400 bg-white/10"
-                : "text-white/85 hover:text-white hover:bg-white/10"}`
-            }
-          >
-            Shop All
-          </NavLink>
-          <div className="w-px h-4 bg-white/20 mx-1" />
-
-          {/* Primary categories */}
-          {primaryCategories.map((cat) => (
+      <nav className="bg-[#232f3e] relative z-[150] w-full border-t border-white/10">
+        <div className="flex items-center justify-between gap-1 sm:gap-2 px-2 md:px-4 min-h-[40px] max-w-full overflow-hidden">
+          {/* Left: Home & Shop All */}
+          <div className="flex items-center gap-1 shrink-0">
             <NavLink
-              key={cat}
-              to={`/shop?category=${encodeURIComponent(cat)}`}
+              to="/"
               className={({ isActive }) =>
-                `px-3 py-1.5 text-[0.82rem] font-medium whitespace-nowrap rounded
-                 transition-colors ${isActive
-                  ? "text-amber-400 bg-white/10 font-bold"
-                  : "text-white/80 hover:text-white hover:bg-white/10"}`
+                `px-2.5 py-1 text-[0.82rem] font-semibold whitespace-nowrap rounded transition-colors ${
+                  isActive
+                    ? "text-amber-400 bg-white/10"
+                    : "text-white/85 hover:text-white hover:bg-white/10"
+                }`
               }
             >
-              {cat}
+              Home
             </NavLink>
-          ))}
-
-          {/* More Categories Dropdown */}
-          {moreCategories.length > 0 && (
-            <div
-              className="relative"
-              onMouseEnter={() => setShowMoreCategories(true)}
-              onMouseLeave={() => setShowMoreCategories(false)}
-            >
-              <button
-                type="button"
-                onClick={() => setShowMoreCategories(!showMoreCategories)}
-                className={`flex items-center gap-1 px-3 py-1.5 text-[0.82rem] font-medium rounded transition-colors ${
-                  showMoreCategories
+            <NavLink
+              to="/shop"
+              className={({ isActive }) =>
+                `px-2.5 py-1 text-[0.82rem] font-semibold whitespace-nowrap rounded transition-colors ${
+                  isActive
                     ? "text-amber-400 bg-white/10"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                <span>More Categories</span>
-                <ChevronDownIcon />
-              </button>
+                    : "text-white/85 hover:text-white hover:bg-white/10"
+                }`
+              }
+            >
+              Shop All
+            </NavLink>
+            <div className="w-px h-4 bg-white/20 mx-1 shrink-0" />
+          </div>
 
-              {showMoreCategories && (
-                <div className="absolute top-full left-0 mt-0.5 w-56 bg-[#232f3e] border border-white/15 rounded-lg shadow-2xl py-2 z-[300] grid grid-cols-1 divide-y divide-white/5">
-                  {moreCategories.map((cat) => (
-                    <NavLink
-                      key={cat}
-                      to={`/shop?category=${encodeURIComponent(cat)}`}
-                      onClick={() => setShowMoreCategories(false)}
-                      className={({ isActive }) =>
-                        `px-4 py-2 text-xs transition-colors ${
-                          isActive
-                            ? "text-amber-400 bg-white/10 font-bold"
-                            : "text-white/80 hover:text-amber-400 hover:bg-white/10 font-medium"
-                        }`
-                      }
-                    >
-                      {cat}
-                    </NavLink>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Right-aligned My Orders */}
-          <div className="ml-auto flex items-center gap-2">
-            {user?.role !== "seller" && (
+          {/* Center: Scrollable Categories */}
+          <div className="flex-1 flex items-center gap-1 overflow-x-auto no-scrollbar scrollbar-none py-1 px-1 scroll-smooth">
+            {generalCats.map((cat) => (
               <NavLink
-                to="/orders"
+                key={cat}
+                to={`/shop?category=${encodeURIComponent(cat)}`}
                 className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-1 text-[0.82rem] font-bold whitespace-nowrap rounded-md
-                   transition-all duration-150 ${isActive
-                    ? "text-amber-400 bg-amber-400/20 border border-amber-400/50 shadow-sm"
-                    : "text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-400/50"}`
+                  `px-2.5 py-1 text-[0.82rem] font-medium whitespace-nowrap rounded transition-colors shrink-0 ${
+                    isActive
+                      ? "text-amber-400 bg-white/10 font-bold"
+                      : "text-white/80 hover:text-white hover:bg-white/10"
+                  }`
                 }
               >
-                <span>📦</span>
-                <span>My Orders</span>
+                {cat}
               </NavLink>
+            ))}
+          </div>
+
+          {/* Right: All Categories Dropdown */}
+          <div
+            className="relative shrink-0 ml-1"
+            onMouseEnter={() => setShowMoreCategories(true)}
+            onMouseLeave={() => setShowMoreCategories(false)}
+          >
+            <button
+              type="button"
+              onClick={() => setShowMoreCategories(!showMoreCategories)}
+              className={`flex items-center gap-1 px-2.5 py-1 text-[0.82rem] font-medium rounded transition-colors whitespace-nowrap ${
+                showMoreCategories
+                  ? "text-amber-400 bg-white/10"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              <span className="hidden sm:inline">All Categories</span>
+              <span className="sm:hidden">More</span>
+              <ChevronDownIcon />
+            </button>
+
+            {showMoreCategories && (
+              <div className="absolute top-full right-0 mt-0.5 w-60 max-h-[75vh] overflow-y-auto bg-[#232f3e] border border-white/15 rounded-lg shadow-2xl py-2 z-[300] grid grid-cols-1 divide-y divide-white/5">
+                {generalCats.map((cat) => (
+                  <NavLink
+                    key={cat}
+                    to={`/shop?category=${encodeURIComponent(cat)}`}
+                    onClick={() => setShowMoreCategories(false)}
+                    className={({ isActive }) =>
+                      `px-4 py-2 text-xs transition-colors flex items-center justify-between ${
+                        isActive
+                          ? "text-amber-400 bg-white/10 font-bold"
+                          : "text-white/80 hover:text-amber-400 hover:bg-white/10 font-medium"
+                      }`
+                    }
+                  >
+                    <span>{cat}</span>
+                    <span className="text-[10px] text-white/40">›</span>
+                  </NavLink>
+                ))}
+              </div>
             )}
           </div>
         </div>
