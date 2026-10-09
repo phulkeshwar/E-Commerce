@@ -128,8 +128,9 @@ export function Navbar() {
   const location = useLocation();
   const { cart, wishlistIds, user, categories } = useAppContext();
   const allCatList = categories.map((c) => c.name);
-  const primaryCategories = allCatList.slice(0, 5);
-  const moreCategories = allCatList.slice(5);
+  const generalCats = allCatList.filter((c) => c.toLowerCase() !== "software");
+  const primaryCategories = generalCats.slice(0, 6);
+  const moreCategories = generalCats.slice(6);
   const categoryNames = ["All", ...allCatList];
   const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
@@ -411,6 +412,17 @@ export function Navbar() {
           >
             Shop All
           </NavLink>
+          <NavLink
+            to="/shop?category=Software"
+            className={({ isActive }) =>
+              `px-3 py-1.5 text-[0.82rem] font-bold whitespace-nowrap rounded flex items-center gap-1.5
+               transition-colors ${location.search.includes("category=Software")
+                ? "text-amber-300 bg-amber-500/20 shadow-sm border border-amber-400/30"
+                : "text-amber-400 hover:text-amber-300 hover:bg-white/10"}`
+            }
+          >
+            <span>⚡</span> Software & Apps
+          </NavLink>
           <div className="w-px h-4 bg-white/20 mx-1" />
 
           {/* Primary categories */}
@@ -497,6 +509,7 @@ export function Navbar() {
             {[
               { label: "Home", to: "/" },
               { label: "Shop All", to: "/shop" },
+              { label: "⚡ Software & Apps", to: "/shop?category=Software" },
               ...(user?.role !== "seller" ? [{ label: "My Orders", to: "/orders" }] : []),
               { label: "Wishlist", to: "/wishlist" },
               { label: user ? "Account" : "Sign In", to: user ? "/account" : "/auth" },

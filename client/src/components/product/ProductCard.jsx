@@ -159,6 +159,61 @@ export function ProductCard({ product }) {
             >
               View Details
             </Link>
+          ) : product.source === "amazon" ? (
+            <div className="flex flex-col gap-1.5">
+              <button
+                disabled={!product.inStock}
+                aria-label={product.inStock ? `Add ${product.name} to cart` : `${product.name} is out of stock`}
+                onClick={() => {
+                  cart.addToCart(product);
+                  notify(`${product.name} added to cart.`);
+                }}
+                className={`w-full py-1.5 rounded text-xs font-bold transition-all duration-150 border-2 cursor-pointer
+                  ${product.inStock
+                    ? "border-[#c4622d] text-[#c4622d] hover:bg-[#c4622d] hover:text-white active:scale-[0.98]"
+                    : "opacity-40 cursor-not-allowed text-gray-400 border-gray-300"}`}
+              >
+                {product.inStock ? "Add to Cart" : "Out of Stock"}
+              </button>
+              <button
+                disabled={!product.inStock}
+                onClick={async () => {
+                  if (!product.inStock) return;
+                  const triggerAction = async (email = null, phone = null) => {
+                    try {
+                      if (user) {
+                        await trackAffiliateClickRequest(product.id);
+                      } else if (email) {
+                        await trackAffiliateClickRequest(product.id, email, phone);
+                      }
+                      window.open(product.affiliateLink, "_blank", "noopener,noreferrer");
+                    } catch (err) {
+                      console.error("Action tracking failed:", err);
+                      notify(err.message || "Failed to process order.");
+                    }
+                  };
+                  if (user) {
+                    await triggerAction();
+                    return;
+                  }
+                  const guestEmail = localStorage.getItem("guestEmail");
+                  const guestPhone = localStorage.getItem("guestPhone") || "";
+                  if (guestEmail) {
+                    await triggerAction(guestEmail, guestPhone);
+                    return;
+                  }
+                  setIsModalOpen(true);
+                }}
+                className={`w-full py-1.5 rounded text-xs font-bold transition-all duration-150 border cursor-pointer flex items-center justify-center gap-1
+                  ${!product.inStock
+                    ? "opacity-40 cursor-not-allowed text-gray-400 border-gray-300"
+                    : "border-amber-400 bg-amber-400/10 text-amber-900 hover:bg-amber-400 hover:text-gray-950 active:scale-[0.98]"
+                  }`}
+              >
+                <span>Buy on Amazon</span>
+                <span className="text-[10px]">↗</span>
+              </button>
+            </div>
           ) : product.productType === "affiliate" ? (
             <button
               disabled={!product.inStock}
@@ -196,7 +251,7 @@ export function ProductCard({ product }) {
               className={`w-full py-2 rounded text-sm font-semibold transition-all duration-150 border-2 cursor-pointer
                           ${!product.inStock
                             ? "opacity-40 cursor-not-allowed text-gray-400 border-gray-300"
-                            : "border-amber-500 bg-amber-500 text-white hover:bg-amber-600 active:scale-[0.98]"
+                            : "border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]"
                           }`}
             >
               {!product.inStock
@@ -207,8 +262,6 @@ export function ProductCard({ product }) {
                 ? "Try Web App"
                 : product.source === "play-store"
                 ? "Get on Play Store"
-                : product.source === "amazon"
-                ? "Buy on Amazon"
                 : "Visit Product"}
             </button>
           ) : (

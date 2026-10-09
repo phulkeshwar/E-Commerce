@@ -96,6 +96,16 @@ export function HomePage() {
       health: { color: "bg-green-50 border-green-200", text: "text-green-700" },
       software: { color: "bg-indigo-50 border-indigo-200", text: "text-indigo-700" },
       gadgets: { color: "bg-amber-50 border-amber-300", text: "text-amber-800" },
+      "mobiles & tablets": { color: "bg-blue-50 border-blue-200", text: "text-blue-700" },
+      "audio & headphones": { color: "bg-purple-50 border-purple-200", text: "text-purple-700" },
+      "laptops & pc accessories": { color: "bg-cyan-50 border-cyan-200", text: "text-cyan-800" },
+      "smart home & tv": { color: "bg-emerald-50 border-emerald-200", text: "text-emerald-700" },
+      "wearables & watches": { color: "bg-rose-50 border-rose-200", text: "text-rose-700" },
+      "gaming gear": { color: "bg-red-50 border-red-200", text: "text-red-700" },
+      "cameras & creator tech": { color: "bg-amber-50 border-amber-200", text: "text-amber-800" },
+      "home & kitchen": { color: "bg-teal-50 border-teal-200", text: "text-teal-700" },
+      "personal care & tech": { color: "bg-pink-50 border-pink-200", text: "text-pink-700" },
+      "desk setup & office": { color: "bg-slate-50 border-slate-200", text: "text-slate-700" },
     };
     const key = name.toLowerCase().trim();
     if (presets[key]) return presets[key];
@@ -480,12 +490,72 @@ export function HomePage() {
               </Link>
             </div>
 
-            <div className="text-[clamp(5rem,10vw,8rem)] filter drop-shadow-2xl select-none flex-shrink-0">
-              {deal.emoji || "🍯"}
+            <div className="w-36 h-36 md:w-56 md:h-56 rounded-2xl bg-white/10 p-3 flex items-center justify-center filter drop-shadow-2xl flex-shrink-0">
+              {deal.images && deal.images[0] ? (
+                <img
+                  src={deal.images[0]}
+                  alt={deal.name}
+                  className="w-full h-full object-contain filter drop-shadow-md rounded-xl"
+                />
+              ) : (
+                <span className="text-[clamp(4rem,8vw,7rem)] select-none">{deal.emoji || "🍯"}</span>
+              )}
             </div>
           </div>
         </section>
       )}
+
+      {/* ══════════════════════════════════
+          AMAZON GREAT INDIAN FESTIVAL 2026 BANNER
+      ══════════════════════════════════ */}
+      <section className="max-w-7xl mx-auto px-4 md:px-8 pb-8">
+        <div className="rounded-2xl p-6 md:p-8 bg-gradient-to-r from-amber-600 via-orange-600 to-red-700 text-white shadow-xl relative overflow-hidden">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="bg-amber-300 text-gray-950 text-xs font-black px-2.5 py-1 rounded-md uppercase tracking-wider">
+                  🔥 LIVE NOW
+                </span>
+                <span className="text-amber-200 text-xs font-semibold tracking-wider uppercase">
+                  Amazon Great Indian Festival 2026
+                </span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-extrabold leading-tight text-white mb-2">
+                160+ Curated Deals Across 10 Tech & Home Groups
+              </h2>
+              <p className="text-white/80 text-sm max-w-2xl leading-relaxed">
+                Add directly to your GaramBazaar guest cart for bundled ordering, or jump straight to Amazon with partner pricing.
+              </p>
+            </div>
+            <Link
+              to="/shop"
+              className="bg-white hover:bg-amber-100 text-gray-900 font-bold px-6 py-3 rounded-xl text-sm shadow-md whitespace-nowrap transition-transform hover:scale-105"
+            >
+              Explore Festive Deals →
+            </Link>
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-white/20 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 text-center">
+            {[
+              { label: "Mobiles & Tablets", emoji: "📱", off: "Up to 40% Off" },
+              { label: "Audio & Headphones", emoji: "🎧", off: "Up to 60% Off" },
+              { label: "Laptops & PC", emoji: "💻", off: "Up to 45% Off" },
+              { label: "Gaming Gear", emoji: "🎮", off: "Up to 50% Off" },
+              { label: "Smart Home & TV", emoji: "📺", off: "Up to 55% Off" },
+            ].map((g) => (
+              <Link
+                key={g.label}
+                to={`/shop?category=${encodeURIComponent(g.label === "Laptops & PC" ? "Laptops & PC Accessories" : g.label)}`}
+                className="bg-white/10 hover:bg-white/20 backdrop-blur-sm p-2.5 rounded-xl transition-colors border border-white/10"
+              >
+                <div className="text-2xl mb-1">{g.emoji}</div>
+                <div className="text-xs font-bold text-white truncate">{g.label}</div>
+                <div className="text-[10px] text-amber-200 font-medium">{g.off}</div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ══════════════════════════════════
           TOP PICKS

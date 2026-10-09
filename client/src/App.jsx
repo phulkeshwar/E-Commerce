@@ -98,11 +98,17 @@ export default function App() {
   }, []);
 
   const [categories, setCategories] = useState([
-    { id: "1", name: "Pantry", emoji: "🥫", slug: "pantry" },
-    { id: "2", name: "Beverages", emoji: "🥤", slug: "beverages" },
-    { id: "3", name: "Home", emoji: "🏠", slug: "home" },
-    { id: "4", name: "Personal Care", emoji: "🧴", slug: "personal-care" },
-    { id: "5", name: "Health", emoji: "🩺", slug: "health" }
+    { id: "1", name: "Mobiles & Tablets", emoji: "📱", slug: "mobiles-tablets" },
+    { id: "2", name: "Audio & Headphones", emoji: "🎧", slug: "audio-headphones" },
+    { id: "3", name: "Laptops & PC Accessories", emoji: "💻", slug: "laptops-pc-accessories" },
+    { id: "4", name: "Smart Home & TV", emoji: "📺", slug: "smart-home-tv" },
+    { id: "5", name: "Wearables & Watches", emoji: "⌚", slug: "wearables-watches" },
+    { id: "6", name: "Gaming Gear", emoji: "🎮", slug: "gaming-gear" },
+    { id: "7", name: "Cameras & Creator Tech", emoji: "📸", slug: "cameras-creator-tech" },
+    { id: "8", name: "Home & Kitchen", emoji: "🍳", slug: "home-kitchen" },
+    { id: "9", name: "Personal Care & Tech", emoji: "🪒", slug: "personal-care-tech" },
+    { id: "10", name: "Desk Setup & Office", emoji: "🪑", slug: "desk-setup-office" },
+    { id: "11", name: "Software", emoji: "⚡", slug: "software" },
   ]);
 
   const reloadCategories = useCallback(async () => {

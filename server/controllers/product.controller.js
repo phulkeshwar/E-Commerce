@@ -20,9 +20,12 @@ const buildMongoQuery = (req) => {
   }
 
   if (category === "Software") {
-    filters.productType = "affiliate";
+    filters.$or = [
+      { category: "Software" },
+      { source: { $in: ["web-app", "chrome-extension"] } }
+    ];
   } else if (category !== "All") {
-    filters.category = category;
+    filters.category = { $regex: new RegExp(`^${escapeRegex(category)}$`, "i") };
   }
 
   if (featured) {

@@ -714,6 +714,40 @@ export function ProductDetailPage() {
                     <>
                       {product.productType === "affiliate" ? (
                         <>
+                          {product.source === "amazon" && (
+                            <div className="flex flex-col sm:flex-row gap-3 mb-2">
+                              <button
+                                onClick={() => {
+                                  const itemToCart = {
+                                    ...product,
+                                    price: displayPrice,
+                                    originalPrice: displayOriginalPrice,
+                                    variantName: selectedVariant ? selectedVariant.name : undefined,
+                                  };
+                                  cart.addToCart(itemToCart);
+                                  notify(`${product.name}${selectedVariant ? ` (${selectedVariant.name})` : ""} added to cart.`);
+                                }}
+                                className="w-full py-3 rounded-xl font-bold text-sm border-2 transition-all border-[#c4622d] text-[#c4622d] hover:bg-[#c4622d] hover:text-white cursor-pointer bg-transparent"
+                              >
+                                🛒 Add to Cart
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const itemToCart = {
+                                    ...product,
+                                    price: displayPrice,
+                                    originalPrice: displayOriginalPrice,
+                                    variantName: selectedVariant ? selectedVariant.name : undefined,
+                                  };
+                                  cart.addToCart(itemToCart);
+                                  navigate("/cart");
+                                }}
+                                className="w-full py-3 rounded-xl font-bold text-sm transition-all bg-[#c4622d] hover:bg-[#e07a4a] text-white shadow-sm cursor-pointer border-0"
+                              >
+                                ⚡ Buy Now
+                              </button>
+                            </div>
+                          )}
                           <button
                             onClick={async () => {
                               const triggerAction = async (email = null, phone = null) => {
@@ -744,7 +778,10 @@ export function ProductDetailPage() {
 
                               setIsModalOpen(true);
                             }}
-                            className="w-full py-3 rounded-xl font-bold text-sm transition-all text-center shadow-sm cursor-pointer border-2 border-amber-500 bg-amber-500 hover:bg-amber-600 text-white"
+                            className={`w-full py-3 rounded-xl font-bold text-sm transition-all text-center shadow-sm cursor-pointer border-2
+                              ${product.source === "amazon"
+                                ? "border-amber-500 bg-amber-500 hover:bg-amber-600 text-gray-950 flex items-center justify-center gap-1.5"
+                                : "border-indigo-600 bg-indigo-600 hover:bg-indigo-700 text-white"}`}
                           >
                             {product.source === "chrome-extension"
                               ? "Install Extension"
@@ -753,13 +790,13 @@ export function ProductDetailPage() {
                               : product.source === "play-store"
                               ? "Get on Play Store"
                               : product.source === "amazon"
-                              ? "Buy on Amazon"
+                              ? "Buy on Amazon (Festive Deal) ↗"
                               : "Visit Product"}
                           </button>
                           {product.source === "amazon" && (
                             <div className="space-y-1.5 text-center px-1 pt-1">
                               <p className="text-[11px] font-medium text-amber-900 bg-amber-50 border border-amber-200 rounded-lg py-1.5 px-3 flex items-center justify-center gap-1.5">
-                                <span>📦</span> Fulfilled by Amazon • Prime delivery & official seller guarantee
+                                <span>📦</span> Fulfilled by Amazon • Great Indian Festival Deals Verified
                               </p>
                               <p className="text-[10px] text-gray-500 leading-snug italic">
                                 *As an Amazon Associate I earn from qualifying purchases. Real-time prices, stock, and deals are verified on Amazon.*
