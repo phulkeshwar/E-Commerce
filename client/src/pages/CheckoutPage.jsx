@@ -920,8 +920,16 @@ export function CheckoutPage() {
           <h4 className="font-black text-sm text-[#2c1a0e] border-b border-gray-150 pb-2 mb-3">Your Items ({cart.summary.itemCount})</h4>
           <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
             {calculatedItems.map((item) => (
-              <div key={`${item.id}-${item.variantName || ""}`} className="flex items-start justify-between gap-3 text-xs">
-                <span className="text-xl shrink-0">{item.emoji || "📦"}</span>
+              <div key={item.id} className="flex items-center justify-between gap-3 text-xs">
+                <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center overflow-hidden shrink-0 border border-gray-200">
+                  {item.images?.[0]?.url || item.imageUrl ? (
+                    <img src={item.images?.[0]?.url || item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <span className="block font-bold text-gray-800 truncate leading-tight">
                     {item.name} {item.variantName ? `(${item.variantName})` : ""}

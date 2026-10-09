@@ -15,10 +15,14 @@ export function CartItem({ item, onQuantityChange, onRemove }) {
                    flex items-center justify-center text-4xl"
         style={{ background: item.bg || "#f5f0e8" }}
       >
-        {item.images?.[0]?.url ? (
-          <img className="w-full h-full object-cover" src={item.images[0].url} alt={item.name} />
+        {item.images?.[0]?.url || item.imageUrl ? (
+          <img className="w-full h-full object-cover" src={item.images?.[0]?.url || item.imageUrl} alt={item.name} />
         ) : (
-          item.emoji || "📦"
+          <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+            <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
         )}
       </div>
 

@@ -29,7 +29,7 @@ export function SellerFaqsTab({
                     Product
                   </span>
                   <span className="text-xs font-semibold text-gray-600">
-                    {product ? `${product.emoji} ${product.name}` : "Unknown Product"}
+                    {product ? product.name : "Unknown Product"}
                   </span>
                 </div>
 

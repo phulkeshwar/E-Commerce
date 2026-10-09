@@ -73,7 +73,6 @@ export function AdminReviewModTab({
                   className="hover:bg-amber-50/20 transition-colors border-b border-gray-100 last:border-0"
                 >
                   <td className="!py-3 !px-4 text-xs font-semibold text-gray-900 whitespace-nowrap">
-                    <span className="mr-1">{rev.product?.emoji || "📦"}</span>
                     {rev.product?.name || "Unknown Product"}
                   </td>
                   <td className="!py-3 !px-4 text-xs text-gray-750 whitespace-nowrap">

@@ -24,7 +24,7 @@ export function SellerReviewsTab({
         >
           {dashboard?.products?.map((prod) => (
             <option key={prod.id} value={prod.id}>
-              {prod.emoji} {prod.name} ({prod.reviewCount || 0} reviews)
+              {prod.name} ({prod.reviewCount || 0} reviews)
             </option>
           ))}
           {dashboard?.products?.length === 0 && (

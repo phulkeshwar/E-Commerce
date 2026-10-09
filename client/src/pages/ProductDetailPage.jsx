@@ -434,7 +434,12 @@ export function ProductDetailPage() {
                   alt={product.name}
                 />
               ) : (
-                <span className="text-[8rem] select-none">{product.emoji || "📦"}</span>
+                <div className="w-full h-[320px] md:h-[380px] flex flex-col items-center justify-center bg-gray-50 text-gray-400 p-6 text-center">
+                  <svg className="w-20 h-20 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{product.category || "Product Image"}</span>
+                </div>
               )}
               {product.badge && (
                 <span className={`absolute top-3 left-3 px-2.5 py-1 rounded text-[0.65rem] font-bold uppercase tracking-wide
@@ -1145,7 +1150,11 @@ export function ProductDetailPage() {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <span className="text-3xl select-none">{p.emoji || "📦"}</span>
+                              <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                                <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                              </div>
                             )}
                           </div>
                           <button

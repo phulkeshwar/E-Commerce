@@ -61,9 +61,15 @@ export function TrackHistoryModal({ isOpen, onClose, onSubmit, product }) {
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <span className="text-3xl filter drop-shadow-sm select-none">
-              {product.emoji || "💻"}
-            </span>
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200 shrink-0">
+              {product.images?.[0]?.url || product.imageUrl ? (
+                <img src={product.images?.[0]?.url || product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+              ) : (
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              )}
+            </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900 leading-snug">
                 Track Your Installation

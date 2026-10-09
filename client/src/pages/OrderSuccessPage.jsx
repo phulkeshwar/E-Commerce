@@ -25,7 +25,7 @@ function downloadInvoicePDF(order) {
       const lineItemsHtml = order.items.map((item, idx) => `
         <tr style="border-bottom: 1px solid #e5e7eb;">
           <td style="padding: 10px 8px; text-align: center; color: #6b7280;">${idx + 1}</td>
-          <td style="padding: 10px 8px; font-weight: 700; color: #111827;">${item.emoji || "📦"} ${item.name} ${item.variantName ? `(${item.variantName})` : ""}</td>
+          <td style="padding: 10px 8px; font-weight: 700; color: #111827;">${item.name} ${item.variantName ? `(${item.variantName})` : ""}</td>
           <td style="padding: 10px 8px; text-align: center;">${item.quantity}</td>
           <td style="padding: 10px 8px; text-align: right;">₹${item.price}</td>
           <td style="padding: 10px 8px; text-align: right; font-weight: 700; color: #111827;">₹${item.price * item.quantity}</td>

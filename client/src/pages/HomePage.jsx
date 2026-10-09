@@ -491,14 +491,18 @@ export function HomePage() {
             </div>
 
             <div className="w-36 h-36 md:w-56 md:h-56 rounded-2xl bg-white/10 p-3 flex items-center justify-center filter drop-shadow-2xl flex-shrink-0">
-              {deal.images && deal.images[0] ? (
+              {(deal.images?.[0]?.url || (typeof deal.images?.[0] === "string" && deal.images[0])) ? (
                 <img
-                  src={deal.images[0]}
+                  src={deal.images[0]?.url || deal.images[0]}
                   alt={deal.name}
                   className="w-full h-full object-contain filter drop-shadow-md rounded-xl"
                 />
               ) : (
-                <span className="text-[clamp(4rem,8vw,7rem)] select-none">{deal.emoji || "🍯"}</span>
+                <div className="w-full h-full flex items-center justify-center">
+                  <svg className="w-20 h-20 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
               )}
             </div>
           </div>

@@ -118,7 +118,7 @@ export function OrdersPage() {
                         price: item.price,
                         variantName: item.variantName,
                         quantity: item.quantity,
-                        emoji: item.emoji || "📦",
+                        images: item.images || (item.imageUrl ? [{ url: item.imageUrl }] : []),
                       }));
                       cart.bulkAddToCart(itemsToRestore);
                       notify("Items added to your cart!");

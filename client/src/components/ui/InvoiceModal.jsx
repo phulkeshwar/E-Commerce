@@ -125,7 +125,7 @@ export function InvoiceModal({ isOpen, onClose, order }) {
                   <tr key={index} className="border-b border-gray-150 text-gray-700">
                     <td className="py-2.5 px-3 text-center font-medium text-gray-400">{index + 1}</td>
                     <td className="py-2.5 px-3 font-semibold text-gray-900">
-                      {item.emoji} {item.name}
+                      {item.name}
                     </td>
                     <td className="py-2.5 px-3 text-center">{item.quantity}</td>
                     <td className="py-2.5 px-3 text-right">{formatCurrency(item.price)}</td>
