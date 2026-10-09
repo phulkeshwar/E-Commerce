@@ -13,6 +13,8 @@
     "import:affiliate": "node scripts/importAffiliateProducts.js",
     "import:gadgets": "node scripts/importAmazonGadgets.js",
     "import:amazon": "node scripts/importFromAmazonApi.js",
+    "software:hide": "node scripts/exportAndHideSoftware.js",
+    "software:unhide": "node scripts/restoreSoftwareProducts.js",
     "test": "node --test tests/integration.test.js"
   },
   "dependencies": {

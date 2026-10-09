@@ -19,12 +19,7 @@ const buildMongoQuery = (req) => {
     filters.$text = { $search: search };
   }
 
-  if (category === "Software") {
-    filters.$or = [
-      { category: "Software" },
-      { source: { $in: ["web-app", "chrome-extension"] } }
-    ];
-  } else if (category !== "All") {
+  if (category !== "All") {
     filters.category = { $regex: new RegExp(`^${escapeRegex(category)}$`, "i") };
   }
 

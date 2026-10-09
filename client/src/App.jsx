@@ -108,7 +108,6 @@ export default function App() {
     { id: "8", name: "Home & Kitchen", emoji: "🍳", slug: "home-kitchen" },
     { id: "9", name: "Personal Care & Tech", emoji: "🪒", slug: "personal-care-tech" },
     { id: "10", name: "Desk Setup & Office", emoji: "🪑", slug: "desk-setup-office" },
-    { id: "11", name: "Software", emoji: "⚡", slug: "software" },
   ]);
 
   const reloadCategories = useCallback(async () => {

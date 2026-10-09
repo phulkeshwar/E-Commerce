@@ -19,9 +19,11 @@ connectDB().then(async () => {
   server = app.listen(PORT, () => {
     console.log(`GaramBazaar server listening on http://localhost:${PORT}`);
   });
-  importProducts(false).catch((err) => {
-    console.error("Failed to import affiliate products in background:", err);
-  });
+  if (process.env.AUTO_IMPORT_CSV === "true") {
+    importProducts(false).catch((err) => {
+      console.error("Failed to import affiliate products in background:", err);
+    });
+  }
 });
 
 // Handle unhandled rejections

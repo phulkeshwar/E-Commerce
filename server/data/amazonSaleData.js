@@ -25,7 +25,6 @@ export const AMAZON_SALE_GROUPS = [
   { name: "Home & Kitchen", emoji: "🍳", slug: "home-kitchen" },
   { name: "Personal Care & Tech", emoji: "🪒", slug: "personal-care-tech" },
   { name: "Desk Setup & Office", emoji: "🪑", slug: "desk-setup-office" },
-  { name: "Software", emoji: "⚡", slug: "software" },
   { name: "Pantry", emoji: "🥫", slug: "pantry" },
   { name: "Beverages", emoji: "🥤", slug: "beverages" },
   { name: "Health", emoji: "🩺", slug: "health" },
