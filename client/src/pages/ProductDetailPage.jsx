@@ -22,6 +22,7 @@ import { ProductOffers } from "../components/product/ProductOffers";
 import { ProductSpecs } from "../components/product/ProductSpecs";
 import { ProductAiSummary } from "../components/product/ProductAiSummary";
 import { ProductFaqSection } from "../components/product/ProductFaqSection";
+import { getAmazonProductUrl, getAmazonReviewsUrl } from "../utils/amazonLinks";
 
 // Star SVGs
 function Star({ filled, half }) {
@@ -874,7 +875,8 @@ export function ProductDetailPage() {
                                   } else if (email) {
                                     await trackAffiliateClickRequest(product.id, email, phone);
                                   }
-                                  window.open(product.affiliateLink, "_blank", "noopener,noreferrer");
+                                  const targetUrl = getAmazonProductUrl(product);
+                                  window.open(targetUrl, "_blank", "noopener,noreferrer");
                                 } catch (err) {
                                   console.error("Action tracking failed:", err);
                                   notify(err.message || "Failed to process order.");
@@ -986,7 +988,8 @@ export function ProductDetailPage() {
               try {
                 await trackAffiliateClickRequest(product.id, email, phone);
                 if (product.productType === "affiliate") {
-                  window.open(product.affiliateLink, "_blank", "noopener,noreferrer");
+                  const targetUrl = getAmazonProductUrl(product);
+                  window.open(targetUrl, "_blank", "noopener,noreferrer");
                 } else {
                   notify(`🎉 Order processed! Added to your order history.`);
                 }
@@ -1059,10 +1062,8 @@ export function ProductDetailPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    const url = product.affiliateLink?.includes("amazon")
-                      ? `${product.affiliateLink}#customerReviews`
-                      : product.affiliateLink;
-                    window.open(url, "_blank", "noopener,noreferrer");
+                    const reviewUrl = getAmazonReviewsUrl(product);
+                    window.open(reviewUrl, "_blank", "noopener,noreferrer");
                   }}
                   className="shrink-0 px-4 py-2 bg-[#232f3e] hover:bg-[#131921] text-amber-400 hover:text-amber-300 font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
                 >

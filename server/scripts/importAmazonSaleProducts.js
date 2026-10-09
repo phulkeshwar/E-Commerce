@@ -62,8 +62,28 @@ async function run() {
   let insertedCount = 0;
   let updatedCount = 0;
 
+  const VALID_AMAZON_IN_ASINS = new Set([
+    "B0CHX1W1XY",
+    "B09XS7JWHH",
+    "B0C33XXS56",
+    "B0CCZ26B5V",
+    "B098J7Z5NQ",
+    "B07YB32H52",
+    "B08CXL3YQ8",
+    "B08DF248LD",
+    "B098RKWHHZ",
+    "B09738CV2G",
+    "B07H48412Q",
+    "B089K81D5N",
+    "B079DH2J5Q",
+  ]);
+
   for (const item of AMAZON_SALE_PRODUCTS) {
-    const affiliateLink = `https://www.amazon.in/dp/${item.asin}?tag=${PARTNER_TAG}`;
+    const isLiveAsin = item.asin && VALID_AMAZON_IN_ASINS.has(item.asin.toUpperCase());
+    const cleanName = item.name.replace(/[()[\]]/g, " ").replace(/,\s*/g, " ").replace(/\s+/g, " ").trim();
+    const affiliateLink = isLiveAsin
+      ? `https://www.amazon.in/dp/${item.asin}?tag=${PARTNER_TAG}`
+      : `https://www.amazon.in/s?k=${encodeURIComponent(cleanName)}&tag=${PARTNER_TAG}`;
     const baseSlug = slugify(item.name).slice(0, 70);
     const slug = `${baseSlug}-${item.asin.toLowerCase()}`;
 

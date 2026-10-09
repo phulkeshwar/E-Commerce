@@ -33,6 +33,7 @@ function HeartIcon({ filled }) {
 }
 
 import { optimizeCloudinaryUrl } from "../../utils/optimizeImage";
+import { getAmazonProductUrl } from "../../utils/amazonLinks";
 
 export function ProductCard({ product }) {
   const [imageError, setImageError] = useState(false);
@@ -191,7 +192,8 @@ export function ProductCard({ product }) {
                       } else if (email) {
                         await trackAffiliateClickRequest(product.id, email, phone);
                       }
-                      window.open(product.affiliateLink, "_blank", "noopener,noreferrer");
+                      const targetUrl = getAmazonProductUrl(product);
+                      window.open(targetUrl, "_blank", "noopener,noreferrer");
                     } catch (err) {
                       console.error("Action tracking failed:", err);
                       notify(err.message || "Failed to process order.");
@@ -232,7 +234,8 @@ export function ProductCard({ product }) {
                     } else if (email) {
                       await trackAffiliateClickRequest(product.id, email, phone);
                     }
-                    window.open(product.affiliateLink, "_blank", "noopener,noreferrer");
+                    const targetUrl = getAmazonProductUrl(product);
+                    window.open(targetUrl, "_blank", "noopener,noreferrer");
                   } catch (err) {
                     console.error("Action tracking failed:", err);
                     notify(err.message || "Failed to process order.");
@@ -301,7 +304,8 @@ export function ProductCard({ product }) {
             try {
               await trackAffiliateClickRequest(product.id, email, phone);
               if (product.productType === "affiliate") {
-                window.open(product.affiliateLink, "_blank", "noopener,noreferrer");
+                const targetUrl = getAmazonProductUrl(product);
+                window.open(targetUrl, "_blank", "noopener,noreferrer");
               } else {
                 notify(`🎉 Order processed! Added to your order history.`);
               }
