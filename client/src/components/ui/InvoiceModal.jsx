@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
@@ -5,8 +6,54 @@ import { formatDate } from "../../utils/formatDate";
 export function InvoiceModal({ isOpen, onClose, order }) {
   if (!isOpen || !order) return null;
 
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = () => {
+    setIsGeneratingPdf(true);
+    const element = document.getElementById("invoice-print-area");
+    if (!element) {
+      window.print();
+      setIsGeneratingPdf(false);
+      return;
+    }
+
+    const scriptUrl = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+    const run = () => {
+      const opt = {
+        margin: [8, 8, 8, 8],
+        filename: `GaramBazaar-Invoice-${order.orderNumber}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      };
+      window
+        .html2pdf()
+        .set(opt)
+        .from(element)
+        .save()
+        .then(() => setIsGeneratingPdf(false))
+        .catch(() => {
+          setIsGeneratingPdf(false);
+          window.print();
+        });
+    };
+
+    if (window.html2pdf) {
+      run();
+    } else {
+      const script = document.createElement("script");
+      script.src = scriptUrl;
+      script.onload = run;
+      script.onerror = () => {
+        setIsGeneratingPdf(false);
+        window.print();
+      };
+      document.body.appendChild(script);
+    }
   };
 
   const getPaymentMethodLabel = (method) => {
@@ -35,15 +82,22 @@ export function InvoiceModal({ isOpen, onClose, order }) {
           <h3 className="font-extrabold text-sm text-[#2c1a0e] flex items-center gap-1.5">
             <span>📄</span> Order Invoice
           </h3>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPdf}
+              className="bg-[#c4622d] hover:bg-[#e07a4a] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm flex items-center gap-1 cursor-pointer border-0 disabled:opacity-50"
+            >
+              {isGeneratingPdf ? "⏳ Generating..." : "📥 Download PDF"}
+            </button>
             <button
               onClick={handlePrint}
-              className="bg-[#c4622d] hover:bg-[#e07a4a] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors shadow-sm flex items-center gap-1 cursor-pointer border-0"
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors border border-gray-300 flex items-center gap-1 cursor-pointer"
             >
-              🖨️ Print / Save PDF
+              🖨️ Print
             </button>
             <button 
-              className="text-gray-400 hover:text-gray-600 font-black text-xl bg-transparent border-0 cursor-pointer"
+              className="text-gray-400 hover:text-gray-600 font-black text-xl bg-transparent border-0 cursor-pointer pl-1"
               onClick={onClose}
             >
               ×
