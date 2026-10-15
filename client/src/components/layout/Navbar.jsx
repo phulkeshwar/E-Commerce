@@ -458,7 +458,7 @@ export function Navbar() {
             </button>
 
             {showMoreCategories && (
-              <div className="absolute top-full right-0 mt-1 w-64 max-h-[75vh] overflow-y-auto bg-[#232f3e] border border-white/20 rounded-lg shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-2 z-[9999] grid grid-cols-1 divide-y divide-white/5">
+              <div className="custom-scrollbar-dark absolute top-full right-0 mt-1 w-64 max-h-[75vh] overflow-y-auto bg-[#232f3e] border border-white/20 rounded-lg shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-2 z-[9999] grid grid-cols-1 divide-y divide-white/5">
                 {generalCats.map((cat) => (
                   <NavLink
                     key={cat}

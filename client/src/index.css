@@ -99,6 +99,74 @@
     scrollbar-width: none;
   }
 
+  /* ── Modern Professional Scrollbars (Sliders) ─────────────────────── */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+  }
+
+  /* WebKit & Blink Browsers (Chrome, Edge, Safari, Opera) */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 9999px;
+    transition: background-color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.7);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Remove default Windows arrows */
+  ::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  /* ── Dedicated Dark Surface Scrollbar (Dropdowns, Nav, Dark Cards) ─────── */
+  .custom-scrollbar-dark {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  }
+
+  .custom-scrollbar-dark::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  .custom-scrollbar-dark::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar-dark::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 9999px;
+    transition: background-color 0.2s ease;
+  }
+
+  .custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+    background: rgba(251, 191, 36, 0.6);
+  }
+
+  .custom-scrollbar-dark::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
   .page-content {
     width: min(1280px, calc(100% - 1rem));
     @apply mx-auto pb-6;
