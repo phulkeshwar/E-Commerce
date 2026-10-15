@@ -3,157 +3,181 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://garambazaar.vercel.app/</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/vs-competitors</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/contact</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/info/about-us</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/info/shipping-policy</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/info/easy-returns</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/info/privacy-policy</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/info/terms-of-service</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/info/faq</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Audio%20%26%20Headphones</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Beverages</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/shop?category=Budget%20Phones</loc>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Cameras%20%26%20Creator%20Tech</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Desk%20Setup%20%26%20Office</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/shop?category=Flagship%20Phones</loc>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Gadgets</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Gaming%20Gear</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Health</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Home</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Home%20%26%20Kitchen</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Laptops%20%26%20PC%20Accessories</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://garambazaar.vercel.app/shop?category=Mobiles%20%26%20Tablets</loc>
-    <lastmod>2026-10-09</lastmod>
+    <loc>https://garambazaar.vercel.app/shop?category=Mid-Range%20Phones</loc>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Pantry</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Personal%20Care</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Personal%20Care%20%26%20Tech</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Smart%20Home%20%26%20TV</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/shop?category=Speakers</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/shop?category=Tablets%20%26%20E-Readers</loc>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/shop?category=Wearables%20%26%20Watches</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -249,97 +273,97 @@
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/apple-iphone-16-128-gb-teal-b0dghrf4x7</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/apple-iphone-15-128-gb-black-b0chx1w1xy</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/samsung-galaxy-s24-ultra-5g-ai-smartphone-12gb-ram-256gb-b0cs5x6b1c</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/samsung-galaxy-s24-5g-ai-smartphone-8gb-ram-128gb-b0cs5q3j7n</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/oneplus-12-5g-flowy-emerald-16gb-ram-512gb-storage-b0cqppy2c3</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/oneplus-nord-ce4-5g-celadon-marble-8gb-ram-128gb-storage-b0cx24c626</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/iqoo-12-5g-legend-white-12gb-ram-256gb-storage-b0cp97dw81</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/iqoo-z9s-pro-5g-luxe-marble-8gb-ram-128gb-storage-b0dcw21ktr</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/xiaomi-14-black-12gb-ram-512gb-storage-leica-optics-b0cthqvj7q</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/redmi-note-13-pro-5g-fusion-purple-8gb-ram-256gb-b0cqx4sgb7</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/realme-gt-6t-5g-fluid-silver-8gb-ram-128gb-storage-b0d4l73kmb</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/apple-ipad-10th-generation-64gb-wi-fi-6-blue-b0bjlc6gpp</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/apple-ipad-air-11-inch-m2-chip-128gb-space-grey-b0d3j35467</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/samsung-galaxy-tab-s9-fe-109-inch-wi-fi-128gb-s-pen-included-b0chzb8387</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/oneplus-pad-2-121-inch-3k-display-snapdragon-8-gen-3-128gb-b0d7hk9b2m</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/amazon-kindle-paperwhite-16-gb-68-display-adjustable-warm-light-b09swty57g</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -375,19 +399,19 @@
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/jbl-flip-6-portable-waterproof-bluetooth-speaker-b09v7vzcp6</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/jbl-charge-5-portable-bluetooth-speaker-with-built-in-powerbank-b08x59bnd4</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/marshall-emberton-ii-portable-bluetooth-speaker-b09yj83b5y</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -411,19 +435,19 @@
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/boat-stone-1800-90w-bluetooth-party-speaker-with-rgb-leds-b0c741hzzk</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/sony-ht-s20r-51ch-dolby-digital-soundbar-with-subwoofer-b07k3c7q4d</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://garambazaar.vercel.app/products/jbl-cinema-sb271-21-channel-soundbar-with-wireless-subwoofer-b09v7xz49s</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1162,6 +1186,132 @@
   <url>
     <loc>https://garambazaar.vercel.app/products/amazon-basics-ergonomic-foot-rest-with-textured-massage-rollers-b00k4a842k</loc>
     <lastmod>2026-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/redmi-13c-5g-starlight-black-4gb-ram-128gb-storage-b0cp97dw83</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/samsung-galaxy-m15-5g-celestial-blue-4gb-ram-128gb-storage-b0cp97dw84</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/poco-m6-5g-orion-blue-4gb-ram-128gb-storage-b0cp97dw85</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/realme-narzo-70x-5g-ice-blue-6gb-ram-128gb-storage-b0cp97dw86</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/iqoo-z9x-5g-tornado-green-6gb-ram-128gb-storage-b0cp97dw87</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/motorola-g34-5g-ocean-green-8gb-ram-128gb-storage-b0cp97dw88</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/lava-blaze-curve-5g-glass-viridian-8gb-ram-128gb-storage-b0cp97dw89</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/redmi-12-5g-jade-black-6gb-ram-128gb-storage-b0cp97dw90</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/nothing-phone-2a-plus-5g-grey-8gb-ram-256gb-storage-b0cp97dw91</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/motorola-edge-50-fusion-5g-marshmallow-blue-8gb-ram-128gb-storage-b0cp97dw92</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/oneplus-nord-4-5g-oasis-green-8gb-ram-256gb-storage-b0cp97dw93</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/vivo-v40-5g-ganges-blue-8gb-ram-128gb-storage-zeiss-optics-b0cp97dw94</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/iqoo-neo-9-pro-5g-fiery-red-8gb-ram-128gb-storage-b0cp97dw95</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/apple-iphone-16-pro-128-gb-desert-titanium-b0cp97dw96</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/google-pixel-9-peony-12gb-ram-256gb-storage-b0cp97dw97</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/vivo-x100-pro-5g-asteroid-black-16gb-ram-512gb-zeiss-apo-telephoto-b0cp97dw98</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/marshall-stanmore-iii-wireless-home-bluetooth-speaker-iconic-rock-soun-b0cp97dw99</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/bose-soundlink-flex-bluetooth-portable-waterproof-speaker-deep-clear-a-b0cp97e001</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/jbl-partybox-110-portable-bluetooth-party-speaker-with-built-in-dynami-b0cp97e002</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/amazon-echo-dot-5th-gen-smart-speaker-with-alexa-deeper-bass-motion-se-b0cp97e003</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://garambazaar.vercel.app/products/boat-stone-352-bluetooth-speaker-with-10w-rms-stereo-sound-ipx7-b0cp97e004</loc>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
