@@ -204,7 +204,7 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-[200] shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+    <header className="sticky top-0 z-[1000] shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
 
       {/* ── Top Bar ─────────────────────────────────────────────────────── */}
       <div className="bg-[#131921] flex items-center gap-3 px-3 md:px-6 py-2 md:py-0 md:min-h-[64px]">
@@ -387,8 +387,8 @@ export function Navbar() {
       )}
 
       {/* ── Categories Nav Bar ───────────────────────────────────────────── */}
-      <nav className="bg-[#232f3e] relative z-[150] w-full border-t border-white/10">
-        <div className="flex items-center justify-between gap-1 sm:gap-2 px-2 md:px-4 min-h-[40px] max-w-full overflow-hidden">
+      <nav className="bg-[#232f3e] relative z-[1000] w-full border-t border-white/10 overflow-visible">
+        <div className="flex items-center justify-between gap-1 sm:gap-2 px-2 md:px-4 min-h-[40px] max-w-full overflow-visible relative">
           {/* Left: Home & Shop All */}
           <div className="flex items-center gap-1 shrink-0">
             <NavLink
@@ -419,7 +419,7 @@ export function Navbar() {
           </div>
 
           {/* Center: Scrollable Categories */}
-          <div className="flex-1 flex items-center gap-1 overflow-x-auto no-scrollbar scrollbar-none py-1 px-1 scroll-smooth">
+          <div className="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto no-scrollbar scrollbar-none py-1 px-1 scroll-smooth">
             {generalCats.map((cat) => (
               <NavLink
                 key={cat}
@@ -439,7 +439,7 @@ export function Navbar() {
 
           {/* Right: All Categories Dropdown */}
           <div
-            className="relative shrink-0 ml-1"
+            className="relative shrink-0 ml-1 z-[1050]"
             onMouseEnter={() => setShowMoreCategories(true)}
             onMouseLeave={() => setShowMoreCategories(false)}
           >
@@ -458,7 +458,7 @@ export function Navbar() {
             </button>
 
             {showMoreCategories && (
-              <div className="absolute top-full right-0 mt-0.5 w-60 max-h-[75vh] overflow-y-auto bg-[#232f3e] border border-white/15 rounded-lg shadow-2xl py-2 z-[300] grid grid-cols-1 divide-y divide-white/5">
+              <div className="absolute top-full right-0 mt-1 w-64 max-h-[75vh] overflow-y-auto bg-[#232f3e] border border-white/20 rounded-lg shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-2 z-[9999] grid grid-cols-1 divide-y divide-white/5">
                 {generalCats.map((cat) => (
                   <NavLink
                     key={cat}

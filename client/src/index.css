@@ -1664,7 +1664,7 @@
     background: rgba(44, 26, 14, 0.35);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    z-index: 500;
+    z-index: 10000;
     @apply fixed inset-0 flex items-center justify-center p-4;
   }
 
