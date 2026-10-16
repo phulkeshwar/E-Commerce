@@ -10,8 +10,7 @@ export const setStoredSession = (session) => {
     localStorage.removeItem(AUTH_KEY);
     return;
   }
-  const { token, ...safeSession } = session;
-  localStorage.setItem(AUTH_KEY, JSON.stringify(safeSession));
+  localStorage.setItem(AUTH_KEY, JSON.stringify(session));
 };
 
 export const clearStoredSession = () => {

@@ -157,9 +157,14 @@ export function AdminPage() {
 
   // Data Loading callbacks
   const loadDashboard = useCallback(async () => {
-    const data = await getDashboardRequest();
-    setDashboard(data);
-  }, []);
+    try {
+      const data = await getDashboardRequest();
+      setDashboard(data);
+    } catch (err) {
+      console.error("Failed to load admin dashboard:", err);
+      notify(err?.message || "Failed to load dashboard data.");
+    }
+  }, [notify]);
 
   const loadAnalytics = useCallback(async () => {
     try {

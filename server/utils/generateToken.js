@@ -13,8 +13,8 @@ const getSecret = () => {
 export const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "lax", // Lax is standard for local dev with different ports
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (matching JWT_REFRESH_EXPIRES if we use it, or default 7d)
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 export const generateToken = (user) =>
