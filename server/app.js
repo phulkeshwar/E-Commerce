@@ -70,11 +70,21 @@ app.use(
     },
   }),
 );
-app.use(apiRateLimiter);
-
-app.get("/api/health", (_req, res) => {
-  res.json({ success: true, message: "GaramBazaar API is running." });
+// ── Health Check (Exempt from rate limiting, fast 200 for uptime monitors) ──
+app.all(["/api/health", "/health"], (req, res) => {
+  if (req.method === "HEAD") {
+    return res.status(200).end();
+  }
+  return res.status(200).json({
+    success: true,
+    message: "GaramBazaar API is running.",
+    status: "healthy",
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
 });
+
+app.use(apiRateLimiter);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
