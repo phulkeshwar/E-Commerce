@@ -120,30 +120,44 @@ initRedis();
  * Universal Cache Getter (Redis with Memory Fallback)
  */
 export const getCache = async (key) => {
+  // 1. Ultra-fast in-memory check (0ms)
+  const memValue = await memoryCache.get(key);
+  if (memValue !== null && memValue !== undefined) {
+    return memValue;
+  }
+
+  // 2. Distributed Redis check
   if (isRedisAvailable && redisClient) {
     try {
       const data = await redisClient.get(key);
-      return data ? JSON.parse(data) : null;
+      if (data) {
+        const parsed = JSON.parse(data);
+        // Hydrate local memory cache so subsequent calls are 0ms
+        await memoryCache.set(key, parsed, 60);
+        return parsed;
+      }
     } catch {
-      return memoryCache.get(key);
+      return null;
     }
   }
-  return memoryCache.get(key);
+  return null;
 };
 
 /**
  * Universal Cache Setter (Redis with Memory Fallback)
  */
 export const setCache = async (key, value, ttlSeconds = 60) => {
+  // Always update in-memory cache immediately
+  await memoryCache.set(key, value, ttlSeconds);
+
+  // Sync to distributed Redis asynchronously without blocking
   if (isRedisAvailable && redisClient) {
     try {
       await redisClient.set(key, JSON.stringify(value), "EX", ttlSeconds);
-      return;
     } catch {
-      // Fallback
+      // Ignored
     }
   }
-  await memoryCache.set(key, value, ttlSeconds);
 };
 
 /**

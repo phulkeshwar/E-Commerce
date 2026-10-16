@@ -58,6 +58,8 @@ export function ProductCard({ product }) {
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               src={optimizeCloudinaryUrl(imageUrl, { width: 400 })}
               alt={product.name}
+              loading="lazy"
+              decoding="async"
               onError={() => setImageError(true)}
             />
           ) : (

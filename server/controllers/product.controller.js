@@ -78,6 +78,16 @@ const buildMongoQuery = (req) => {
   return filters;
 };
 
+const formatProduct = (p) => {
+  if (!p) return null;
+  return {
+    ...p,
+    id: p._id ? p._id.toString() : p.id,
+    specifications: p.specifications || {},
+    quantityDiscounts: p.quantityDiscounts || [],
+  };
+};
+
 export const getProducts = async (req, res) => {
   const page = Math.max(1, Number(req.query.page || 1));
   const limit = Math.max(1, Number(req.query.limit || 12));
@@ -109,9 +119,9 @@ export const getProducts = async (req, res) => {
   }
 
   const [products, totalItems, featured] = await Promise.all([
-    Product.find(mongoQuery, queryProj).sort(sortOption).skip(skip).limit(limit),
+    Product.find(mongoQuery, queryProj).sort(sortOption).skip(skip).limit(limit).lean(),
     Product.countDocuments(mongoQuery),
-    Product.find(featuredQuery).sort({ rating: -1 }).limit(12),
+    Product.find(featuredQuery).sort({ rating: -1 }).limit(12).lean(),
   ]);
 
   const totalPages = Math.ceil(totalItems / limit);
@@ -123,8 +133,8 @@ export const getProducts = async (req, res) => {
   }
   res.json(
     new ApiResponse(true, "Products fetched.", {
-      products: products.map((product) => product.toClient()),
-      featured: featured.map((product) => product.toClient()),
+      products: products.map(formatProduct),
+      featured: featured.map(formatProduct),
       pagination: {
         totalItems,
         totalPages,
@@ -139,7 +149,7 @@ export const getProductById = async (req, res) => {
   const lookup = req.params.id.match(/^[a-f\d]{24}$/i)
     ? { $or: [{ _id: req.params.id }, { slug: req.params.id }, { legacyId: req.params.id }] }
     : { $or: [{ slug: req.params.id }, { legacyId: req.params.id }] };
-  const product = await Product.findOne(lookup).populate("seller", "name certificationStatus creditScore");
+  const product = await Product.findOne(lookup).populate("seller", "name certificationStatus creditScore").lean();
 
   if (!product) {
     return res.status(404).json(new ApiResponse(false, "Product not found."));
@@ -147,7 +157,7 @@ export const getProductById = async (req, res) => {
 
   // Draft check
   if (!product.isPublished) {
-    const isOwner = req.user && product.seller && req.user._id.toString() === product.seller._id.toString();
+    const isOwner = req.user && product.seller && req.user._id.toString() === (product.seller._id || product.seller).toString();
     const isAdmin = req.user && req.user.role === "admin";
     if (!isOwner && !isAdmin) {
       return res.status(404).json(new ApiResponse(false, "Product not found."));
@@ -160,13 +170,14 @@ export const getProductById = async (req, res) => {
     _id: { $ne: product._id },
   })
     .sort({ rating: -1 })
-    .limit(4);
+    .limit(4)
+    .lean();
 
   res.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=59");
   res.json(
     new ApiResponse(true, "Product fetched.", {
-      product: product.toClient(),
-      relatedProducts: relatedProducts.map((entry) => entry.toClient()),
+      product: formatProduct(product),
+      relatedProducts: relatedProducts.map(formatProduct),
     }),
   );
 };

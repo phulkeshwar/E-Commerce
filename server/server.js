@@ -14,10 +14,12 @@ process.on("uncaughtException", (err) => {
 const PORT = Number(process.env.PORT || 5001);
 
 let server;
-connectDB().then(async () => {
-  await seedCategories();
+connectDB().then(() => {
   server = app.listen(PORT, () => {
     console.log(`GaramBazaar server listening on http://localhost:${PORT}`);
+  });
+  seedCategories().catch((err) => {
+    console.error("Failed to seed categories:", err);
   });
   if (process.env.AUTO_IMPORT_CSV === "true") {
     importProducts(false).catch((err) => {
