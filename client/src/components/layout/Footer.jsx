@@ -145,8 +145,11 @@ export function Footer() {
                 Garam<span className="text-amber-400">Bazaar</span>
               </span>
             </div>
-            <p className="text-gray-400 text-[0.82rem] leading-relaxed mb-5">
+            <p className="text-gray-400 text-[0.82rem] leading-relaxed mb-3">
               Everyday essentials, thoughtfully sourced from artisans and local producers across India.
+            </p>
+            <p className="text-xs text-amber-300/80 mb-5">
+              Support: <a href="mailto:garamsoftwares@gmail.com" className="hover:text-amber-200 underline font-medium">garamsoftwares@gmail.com</a>
             </p>
             {/* Social Links */}
             <div className="flex items-center gap-2">

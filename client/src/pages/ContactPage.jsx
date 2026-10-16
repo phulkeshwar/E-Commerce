@@ -84,10 +84,20 @@ export function ContactPage() {
         <h2 className="text-center text-4xl font-extrabold text-white tracking-tight">
           {submittedTicket ? "Inquiry Received!" : "Get in Touch"}
         </h2>
-        <p className="mt-2 text-center text-sm text-amber-200/60">
+        <p className="mt-2 text-center text-sm text-amber-200/80">
           {submittedTicket
             ? "Your ticket has been logged and our team has been notified."
-            : "Have an issue or inquiry? Drop us a line and we will resolve it for you."}
+            : (
+              <span>
+                Have an issue or inquiry? Drop us a line below or email directly to{" "}
+                <a
+                  href="mailto:garamsoftwares@gmail.com"
+                  className="text-amber-400 underline font-semibold hover:text-amber-300"
+                >
+                  garamsoftwares@gmail.com
+                </a>
+              </span>
+            )}
         </p>
       </div>
 
@@ -221,7 +231,16 @@ export function ContactPage() {
             </form>
           )}
 
-          <div className="mt-8 text-center border-t border-white/10 pt-6">
+          <div className="mt-8 text-center border-t border-white/10 pt-6 space-y-2">
+            <p className="text-xs text-amber-200/70">
+              Direct Support Email:{" "}
+              <a
+                href="mailto:garamsoftwares@gmail.com"
+                className="text-amber-400 font-semibold underline hover:text-amber-300"
+              >
+                garamsoftwares@gmail.com
+              </a>
+            </p>
             <button
               onClick={() => navigate("/")}
               className="text-sm font-semibold text-amber-200/60 hover:text-amber-400 transition-colors"

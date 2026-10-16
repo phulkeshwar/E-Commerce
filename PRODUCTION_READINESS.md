@@ -78,12 +78,11 @@ RAZORPAY_KEY_ID=rzp_test_replace_me
 RAZORPAY_KEY_SECRET=replace_me
 CLOUDINARY_CLOUD_NAME=replace_me
 CLOUDINARY_API_KEY=replace_me
-CLOUDINARY_API_SECRET=replace_me
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=replace_me
-SMTP_PASS=replace_me
-MAIL_FROM="GaramBazaar <orders@your-domain.com>"
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=garamsoftwares@gmail.com
+SMTP_PASS=your_16_character_app_password
+MAIL_FROM="SupportMail <garamsoftwares@gmail.com>"
 ```
 
 ## What Changed

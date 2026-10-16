@@ -11,13 +11,16 @@ const getTransporter = () => {
     const port = Number(process.env.SMTP_PORT) || 465;
     const isPort465 = port === 465;
     const cleanPass = (process.env.SMTP_PASS || "").trim().replace(/\s+/g, "");
+    const cleanUser = (process.env.SMTP_USER || "garamsoftwares@gmail.com")
+      .trim()
+      .replace(/@gma+il\.com/i, "@gmail.com");
 
     transporterSingleton = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
       port,
       secure: isPort465,
       auth: {
-        user: (process.env.SMTP_USER || "").trim(),
+        user: cleanUser,
         pass: cleanPass,
       },
       connectionTimeout: 15000,
@@ -35,10 +38,13 @@ export const sendEmail = async ({ to, subject, html, text }) => {
   }
 
   const transporter = getTransporter();
+  const cleanUser = (process.env.SMTP_USER || "garamsoftwares@gmail.com")
+    .trim()
+    .replace(/@gma+il\.com/i, "@gmail.com");
 
   try {
     await transporter.sendMail({
-      from: process.env.MAIL_FROM || `GaramBazaar <${process.env.SMTP_USER}>`,
+      from: process.env.MAIL_FROM || `SupportMail <${cleanUser}>`,
       to,
       subject,
       html,

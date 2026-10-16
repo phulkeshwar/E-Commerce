@@ -107,12 +107,25 @@ To avoid emails landing in the spam folder:
 5. Click **Verify & Authenticate** in Brevo.
 
 ### Step 4: Configure Your `.env` File
-Once verified, update your `server/.env` variables:
+
+#### Option A: Gmail SMTP with Google App Password (Active / SupportMail)
+If using Google Account App Passwords for instant delivery without domain DNS setup:
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=garamsoftwares@gmail.com
+SMTP_PASS=ibqd nipd piie aprc
+MAIL_FROM="SupportMail <garamsoftwares@gmail.com>"
+```
+*Note: App name registered in Google Account is **SupportMail**.*
+
+#### Option B: Brevo SMTP Relay
+Once domain DNS is verified:
 ```env
 SMTP_HOST=smtp-relay.brevo.com
 SMTP_PORT=587
 SMTP_USER=your-brevo-username-email@example.com
 SMTP_PASS=xsmtpsib-your-generated-smtp-key
-MAIL_FROM="GaramBazaar <no-reply@yourdomain.com>"
+MAIL_FROM="SupportMail <no-reply@yourdomain.com>"
 ```
 

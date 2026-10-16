@@ -1034,12 +1034,12 @@ CLOUDINARY_API_SECRET=xxxxxxxxxxxxxxxxxxxx
 RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
 RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxx
 
-# Nodemailer
+# Nodemailer (SupportMail)
 SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=noreply@GaramBazaar.in
-SMTP_PASS=your_app_password
-EMAIL_FROM="GaramBazaar <noreply@GaramBazaar.in>"
+SMTP_PORT=465
+SMTP_USER=garamsoftwares@gmail.com
+SMTP_PASS=your_16_character_app_password
+MAIL_FROM="SupportMail <garamsoftwares@gmail.com>"
 ```
 
 ---
