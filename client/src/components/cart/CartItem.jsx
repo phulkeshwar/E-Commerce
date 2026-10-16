@@ -1,6 +1,6 @@
 import { formatCurrency } from "../../utils/formatCurrency";
 
-export function CartItem({ item, onQuantityChange, onRemove }) {
+export function CartItem({ item, onQuantityChange, onRemove, onSaveForLater }) {
   const handleDecrement = () => {
     if (item.quantity > 1) onQuantityChange(item.id, item.quantity - 1, item.variantName);
   };
@@ -45,7 +45,7 @@ export function CartItem({ item, onQuantityChange, onRemove }) {
           {item.inStock ? "✓ In Stock" : "Out of Stock"}
         </p>
 
-        {/* Quantity + Remove */}
+        {/* Quantity + Remove + Save for Later */}
         <div className="flex items-center gap-3 flex-wrap">
           {/* Qty stepper */}
           <div className="flex items-center rounded-lg border border-gray-300 overflow-hidden text-sm">
@@ -72,12 +72,27 @@ export function CartItem({ item, onQuantityChange, onRemove }) {
           <span className="text-gray-300 hidden md:block">|</span>
 
           <button
+            type="button"
             onClick={() => onRemove(item.id, item.variantName)}
             className="text-[0.78rem] font-semibold text-red-500 hover:text-red-700
-                       hover:underline transition-colors"
+                       hover:underline transition-colors cursor-pointer"
           >
             Remove
           </button>
+
+          {onSaveForLater && (
+            <>
+              <span className="text-gray-300 hidden md:block">|</span>
+              <button
+                type="button"
+                onClick={() => onSaveForLater(item.id, item.variantName)}
+                className="text-[0.78rem] font-semibold text-[#007185] hover:text-[#c4622d]
+                           hover:underline transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <span>Save for later</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 

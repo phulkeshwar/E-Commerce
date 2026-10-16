@@ -13,30 +13,58 @@ const resolveProductId = async (id) => {
 };
 
 const buildCartItems = async (userId) => {
-  const cart = await Cart.findOne({ userId }).populate("items.productId");
+  const cart = await Cart.findOne({ userId })
+    .populate("items.productId")
+    .populate("savedForLater.productId");
 
   if (!cart) {
-    return [];
+    return { items: [], savedForLater: [] };
   }
 
-  return cart.items
-    .filter((item) => item.productId)
-    .map((item) => ({
-      productId: item.productId._id.toString(),
+  const mapItem = (item) => {
+    if (!item.productId) return null;
+    const prod = item.productId.toClient ? item.productId.toClient() : item.productId;
+    let price = prod.price;
+    let originalPrice = prod.originalPrice;
+    if (item.variantName && prod.variants) {
+      const variant = prod.variants.find((v) => v.name === item.variantName);
+      if (variant) {
+        price = variant.price;
+        originalPrice = variant.originalPrice;
+      }
+    }
+    return {
+      productId: prod.id || prod._id.toString(),
       quantity: item.quantity,
       variantName: item.variantName,
-      product: item.productId.toClient(),
-    }));
+      product: {
+        ...prod,
+        price,
+        originalPrice,
+      },
+    };
+  };
+
+  return {
+    items: cart.items.map(mapItem).filter(Boolean),
+    savedForLater: (cart.savedForLater || []).map(mapItem).filter(Boolean),
+  };
 };
 
 export const getCart = async (req, res) => {
-  res.json(new ApiResponse(true, "Cart fetched.", { items: await buildCartItems(req.user._id) }));
+  const cartData = await buildCartItems(req.user._id);
+  res.json(new ApiResponse(true, "Cart fetched.", cartData));
 };
 
 export const updateCart = async (req, res) => {
   const rawItems = Array.isArray(req.body.items) ? req.body.items : [];
+  const rawSaved = Array.isArray(req.body.savedForLater) ? req.body.savedForLater : null;
 
-  const rawProductIds = rawItems.map((item) => item.productId).filter(Boolean);
+  const rawProductIds = [
+    ...rawItems.map((item) => item.productId).filter(Boolean),
+    ...(rawSaved ? rawSaved.map((item) => item.productId).filter(Boolean) : []),
+  ];
+
   const objectIds = [];
   const legacyIds = [];
 
@@ -67,8 +95,7 @@ export const updateCart = async (req, res) => {
     }
   }
 
-  const normalized = [];
-
+  const normalizedItems = [];
   for (const item of rawItems) {
     const rawId = item.productId?.toString();
     const product = productMap.get(rawId);
@@ -89,14 +116,29 @@ export const updateCart = async (req, res) => {
       }
     }
 
-    normalized.push({ productId: product._id, quantity, variantName: item.variantName });
+    normalizedItems.push({ productId: product._id, quantity, variantName: item.variantName });
+  }
+
+  const updateFields = { items: normalizedItems };
+
+  if (rawSaved !== null) {
+    const normalizedSaved = [];
+    for (const item of rawSaved) {
+      const rawId = item.productId?.toString();
+      const product = productMap.get(rawId);
+      const quantity = Math.max(1, Math.min(Number(item.quantity || 1), 99));
+      if (!product) continue;
+      normalizedSaved.push({ productId: product._id, quantity, variantName: item.variantName });
+    }
+    updateFields.savedForLater = normalizedSaved;
   }
 
   await Cart.findOneAndUpdate(
     { userId: req.user._id },
-    { $set: { items: normalized } },
+    { $set: updateFields },
     { upsert: true, returnDocument: "after" },
   );
 
-  res.json(new ApiResponse(true, "Cart updated.", { items: await buildCartItems(req.user._id) }));
+  const cartData = await buildCartItems(req.user._id);
+  res.json(new ApiResponse(true, "Cart updated.", cartData));
 };
